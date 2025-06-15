@@ -22,7 +22,11 @@ export const StyledInfoIcon = styled(Info)`
   }
 `;
 
-export const PageWrapper = styled.div`
+export const PageWrapper = styled.div<{ isVisibleHeader: boolean }>`
   width: 100vw;
   height: 100vh;
+
+  margin-top: ${({ isVisibleHeader }) => (isVisibleHeader ? "75px" : 0)};
+
+  transition: margin 0.25s ease-in-out;
 `;

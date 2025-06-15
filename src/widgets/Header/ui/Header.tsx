@@ -1,20 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { HeaderWrapper, NavLink } from "../lib/styles";
 import { PAGES } from "@/lib/router";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BASE_ROUTE, IS_MOBILE } from "@/lib/constants";
+import { useUnit } from "effector-react";
+import { $main, changeMain } from "@/stores/main/main";
 
 export const Header = () => {
   const navigate = useNavigate();
   const currentRoute = useLocation()?.pathname?.replace(BASE_ROUTE, "");
+  const { isVisibleHeader } = useUnit($main);
 
   const lastScrollPos = useRef(window.scrollY);
   const isCooldown = useRef(false);
 
-  const [isVisibleHeader, setIsVisibleHeader] = useState<boolean>(true);
-
   const handleChangeHeaderVisibility = (currentScrollPos: number) => {
-    setIsVisibleHeader(lastScrollPos.current > currentScrollPos);
+    changeMain({ isVisibleHeader: lastScrollPos.current > currentScrollPos });
 
     lastScrollPos.current = currentScrollPos;
   };

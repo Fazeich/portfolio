@@ -1,7 +1,7 @@
 import Link from "@/shared/Link";
 import Paragraph from "@/shared/Paragraph";
 import { EWindowTabs, IWindowTab } from "@/stores/windowsClone/types";
-import React, { FC } from "react";
+import { FC } from "react";
 import { ActiveContentWrapper, LinkWrapper } from "../../lib/styles";
 
 interface IProps {

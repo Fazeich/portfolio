@@ -1,4 +1,3 @@
-import React from "react";
 import { WindowsWindow } from "./WindowsWindow";
 import { ActiveWindow } from "./ActiveWindow";
 

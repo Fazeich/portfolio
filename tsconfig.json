@@ -21,6 +21,6 @@
     },
     "types": ["node"]
   },
-  "include": ["src", "public", "configs"],
+  "include": ["src", "public", "configs", "eslint.config.ts"],
   "exclude": ["node_modules"]
 }

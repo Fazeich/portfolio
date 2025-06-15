@@ -1,7 +1,6 @@
 import { StyledInfoIcon, TitleWrapper } from "@/lib/styles";
 import Paragraph from "@/shared/Paragraph";
 import { Tooltip } from "antd";
-import React from "react";
 import { TooltipWrapper } from "../../lib/styles";
 
 export const AdaptiveTitle = () => {

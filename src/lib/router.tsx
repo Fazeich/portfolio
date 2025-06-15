@@ -19,10 +19,10 @@ export const PAGES: IPage[] = [
     name: "Интерактивность",
     link: "/interactive",
   },
-  {
-    id: uniqueId(),
-    component: <Landings />,
-    name: "Ленденги",
-    link: "/landings",
-  },
+  // {
+  //   id: uniqueId(),
+  //   component: <Landings />,
+  //   name: "Ленденги",
+  //   link: "/landings",
+  // },
 ];

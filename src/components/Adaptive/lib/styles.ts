@@ -17,7 +17,7 @@ export const AdaptiveWrapper = styled.div`
 
   gap: 50px;
 
-  background-color: ${({ theme }) => theme.accent.background};
+  background-color: ${({ theme }) => theme.secondary.background};
 
   user-select: none;
 `;
@@ -75,6 +75,8 @@ export const ContentWrapper = styled.div<{ width?: number }>`
   flex-direction: column;
 
   gap: 1rem;
+
+  border-radius: 8px;
 `;
 
 export const FlexContainer = styled.div`

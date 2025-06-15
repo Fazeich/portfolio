@@ -1,6 +1,9 @@
 import { PageWrapper } from "@/lib/styles";
-import React from "react";
+import { $main } from "@/stores/main/main";
+import { useUnit } from "effector-react";
 
 export const Landings = () => {
-  return <PageWrapper>Landings</PageWrapper>;
+  const { isVisibleHeader } = useUnit($main);
+
+  return <PageWrapper isVisibleHeader={isVisibleHeader}>Landings</PageWrapper>;
 };
