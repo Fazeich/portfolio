@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite --config configs/vite.config.ts",
     "build": "vite build --config configs/vite.config.ts",
-    "lint": "eslint .",
+    "lint": "eslint src --fix",
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
