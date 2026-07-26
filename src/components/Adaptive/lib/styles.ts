@@ -63,7 +63,7 @@ export const GripWrapper = styled.div`
   justify-content: center;
 `;
 
-export const ContentWrapper = styled.div<{ width?: number }>`
+export const ContentWrapper = styled.div<{ width: number }>`
   height: 100%;
 
   width: ${({ width }) => `${width}px`};

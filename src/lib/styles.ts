@@ -26,7 +26,11 @@ export const PageWrapper = styled.div<{ isVisibleHeader: boolean }>`
   width: 100vw;
   height: 100vh;
 
-  margin-top: ${({ isVisibleHeader }) => (isVisibleHeader ? "75px" : 0)};
+  box-sizing: border-box;
 
-  transition: margin 0.25s ease-in-out;
+  padding-top: ${({ isVisibleHeader }) => (isVisibleHeader ? "75px" : 0)};
+
+  background-color: ${({ theme }) => theme.secondary.background};
+
+  transition: padding 0.25s ease-in-out;
 `;

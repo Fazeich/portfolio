@@ -2,7 +2,7 @@ import { createEvent, createStore } from "effector";
 import { IMainStore } from "./types";
 
 export const $main = createStore<IMainStore>({
-  isVisibleHeader: false,
+  isVisibleHeader: true,
 });
 
 export const changeMain = createEvent<IMainStore>();

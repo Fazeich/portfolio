@@ -12,8 +12,6 @@ export const ContactsWrapper = styled.div`
   align-items: center;
   justify-content: center;
 
-  background-color: ${({ theme }) => theme.accent.background};
-
   gap: 20px;
 `;
 

@@ -14,8 +14,6 @@ export const IntroduceWrapper = styled.div`
 
   gap: 30px;
 
-  background-color: ${({ theme }) => theme.secondary.background};
-
   .smooth_text {
     @keyframes smooth {
       from {

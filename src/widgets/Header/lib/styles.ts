@@ -7,12 +7,11 @@ export const HeaderWrapper = styled.div<{ isVisibleHeader: boolean }>`
 
   overflow-x: auto;
 
-  transition: transform 0.25s ease-in-out;
+  transition: height 0.25s ease-in-out;
 
-  transform: ${({ isVisibleHeader }) =>
-    isVisibleHeader ? "none" : "translateY(-75px)"};
+  height: ${({ isVisibleHeader }) => (isVisibleHeader ? "75px" : "0px")};
 
-  position: fixed;
+  position: absolute;
   top: 0;
 
   z-index: 10;

@@ -11,39 +11,6 @@ export const Header = () => {
   const currentRoute = useLocation()?.pathname?.replace(BASE_ROUTE, "");
   const { isVisibleHeader } = useUnit($main);
 
-  const lastScrollPos = useRef(window.scrollY);
-  const isCooldown = useRef(false);
-
-  const handleChangeHeaderVisibility = (currentScrollPos: number) => {
-    changeMain({ isVisibleHeader: lastScrollPos.current > currentScrollPos });
-
-    lastScrollPos.current = currentScrollPos;
-  };
-
-  const handleScroll = (e: Event) => {
-    const currentScrollPos = window.scrollY;
-
-    if (!isCooldown.current) {
-      setTimeout(() => {
-        handleChangeHeaderVisibility(currentScrollPos);
-
-        isCooldown.current = false;
-      }, 150);
-
-      isCooldown.current = true;
-    }
-  };
-
-  useEffect(() => {
-    if (!IS_MOBILE) {
-      document.addEventListener("scroll", handleScroll);
-
-      return () => {
-        document.removeEventListener("scroll", handleScroll);
-      };
-    }
-  }, []);
-
   return (
     <HeaderWrapper isVisibleHeader={isVisibleHeader}>
       {PAGES.map((page) => (

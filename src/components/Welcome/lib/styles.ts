@@ -2,8 +2,8 @@ import { ChevronDown } from "lucide-react";
 import styled from "styled-components";
 
 export const WelcomeWrapper = styled.div`
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
@@ -14,8 +14,6 @@ export const WelcomeWrapper = styled.div`
   gap: 35px;
 
   text-align: center;
-
-  background-color: ${({ theme }) => theme.primary.background};
 
   .smooth_text {
     @keyframes smooth {

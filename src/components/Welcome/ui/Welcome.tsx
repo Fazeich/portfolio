@@ -1,4 +1,4 @@
-import { BouncingArrow, WelcomeWrapper } from "../lib/styles";
+import { WelcomeWrapper } from "../lib/styles";
 import Paragraph from "@/shared/Paragraph";
 import { IS_MOBILE } from "@/lib/constants";
 
@@ -13,8 +13,6 @@ export const Welcome = () => {
         }}
         weight={500}
       />
-
-      <BouncingArrow />
     </WelcomeWrapper>
   );
 };
