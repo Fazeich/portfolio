@@ -1,6 +1,17 @@
 import { Info } from "lucide-react";
 import styled from "styled-components";
 
+export const AppWrapper = styled.div`
+  height: calc(100vh - 75px);
+`;
+
+export const PageWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+
+  background-color: ${({ theme }) => theme.secondary.background};
+`;
+
 export const TitleWrapper = styled.div`
   display: flex;
   align-items: baseline;
@@ -20,17 +31,4 @@ export const StyledInfoIcon = styled(Info)`
   &:hover {
     color: #17a2b8;
   }
-`;
-
-export const PageWrapper = styled.div<{ isVisibleHeader: boolean }>`
-  width: 100vw;
-  height: 100vh;
-
-  box-sizing: border-box;
-
-  padding-top: ${({ isVisibleHeader }) => (isVisibleHeader ? "75px" : 0)};
-
-  background-color: ${({ theme }) => theme.secondary.background};
-
-  transition: padding 0.25s ease-in-out;
 `;

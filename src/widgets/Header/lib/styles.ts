@@ -3,7 +3,6 @@ import styled from "styled-components";
 
 export const HeaderWrapper = styled.div<{ isVisibleHeader: boolean }>`
   width: 100%;
-  height: 75px;
 
   overflow-x: auto;
 
@@ -11,7 +10,7 @@ export const HeaderWrapper = styled.div<{ isVisibleHeader: boolean }>`
 
   height: ${({ isVisibleHeader }) => (isVisibleHeader ? "75px" : "0px")};
 
-  position: absolute;
+  position: sticky;
   top: 0;
 
   z-index: 10;

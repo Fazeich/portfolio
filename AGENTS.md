@@ -10,6 +10,7 @@
 - **Path Requirements**: Every entry in the context files must include the directory path where the file/component is located.
 - **Be concise in reasoning**: Keep reasoning brief and focused.
 - **Be concise in answers**: Keep answers direct and concise.
+- **Folder Structure Adherence**: Always follow the current folder structure.
 
 ## Context Structure
 
