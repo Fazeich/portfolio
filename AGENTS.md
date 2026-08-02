@@ -30,3 +30,10 @@
 4. **Theme Context** (`docs/agents/context/theme.md`):
    - Description of the current styling/theming system, design tokens, and theme-related objects.
    - Includes directory paths.
+
+## Project Conventions
+
+- **`src/lib`** holds shared code (types, utils, hooks, physics, world, styles, theme, constants) imported by 2+ components.
+- Each component may have its own `lib/` folder with files used exclusively by that component. If a file inside a component's `lib/` is imported elsewhere, it must be moved to the common `src/lib`.
+- Fast-changing game state lives in mutable refs (never in React state). Discrete events (score, HP, phase, boost) flow through Effector.
+- Before finishing any task, verify with `npm run lint`, `npm run typecheck`, and `npm run build`.

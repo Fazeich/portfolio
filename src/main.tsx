@@ -1,34 +1,15 @@
 import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { ThemeProvider } from "styled-components";
-import { LIGHT_THEME } from "./lib/theme";
-import axios from "axios";
-import { BASE_ROUTE, OLD_BASE_URL } from "./lib/constants";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { PAGES } from "./lib/router";
-import Header from "./widgets/Header";
-import { AppWrapper } from "./lib/styles";
+import { SnakePage } from "@/pages/Snake";
+import { GlobalStyle } from "@/lib/styles";
+import { GAME_THEME } from "@/lib/theme";
 
-axios.defaults.baseURL = OLD_BASE_URL;
-
-createRoot(document.getElementById("root")).render(
+createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
-    <ThemeProvider theme={LIGHT_THEME}>
-      <BrowserRouter>
-        <AppWrapper>
-          <Header />
-
-          <Routes>
-            {PAGES.map((page) => (
-              <Route
-                path={`${BASE_ROUTE}${page.link}`}
-                element={page.component}
-                key={page.id}
-              />
-            ))}
-          </Routes>
-        </AppWrapper>
-      </BrowserRouter>
+    <ThemeProvider theme={GAME_THEME}>
+      <GlobalStyle />
+      <SnakePage />
     </ThemeProvider>
   </StrictMode>,
 );

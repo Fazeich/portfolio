@@ -19,9 +19,8 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node"],
-    "ignoreDeprecations": "6.0"
+    "types": ["node"]
   },
-  "include": ["src", "public", "configs", "eslint.config.ts"],
+  "include": ["src", "public", "configs"],
   "exclude": ["node_modules"]
 }
