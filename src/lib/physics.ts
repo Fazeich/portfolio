@@ -290,6 +290,10 @@ const breakFood = (world: WorldState, food: { position: Vec3 }): void => {
   const count =
     SHARD_COUNT_MIN +
     Math.floor(Math.random() * (SHARD_COUNT_MAX - SHARD_COUNT_MIN + 1));
+  const breakId = world.breakCounter;
+
+  world.breakCounter += 1;
+  world.activeBreaks.push({ id: breakId, remaining: count });
 
   for (let i = 0; i < count; i += 1) {
     const angle = Math.random() * Math.PI * 2;
@@ -303,18 +307,41 @@ const breakFood = (world: WorldState, food: { position: Vec3 }): void => {
       },
       radius: SHARD_RADIUS,
       bornAt: world.time,
+      breakId,
       eaten: false,
     };
 
     world.shards.push(shard);
   }
 
-  world.activeBreak = { spawned: count, eaten: 0 };
   world.lastBreak = {
     position: { ...food.position },
     at: world.time,
     shards: count,
   };
+};
+
+const consumeBreak = (
+  world: WorldState,
+  breakId: number,
+  awardBonus: boolean,
+): void => {
+  const index = world.activeBreaks.findIndex((track) => track.id === breakId);
+
+  if (index === -1) {
+    return;
+  }
+
+  const track = world.activeBreaks[index];
+  track.remaining -= 1;
+
+  if (track.remaining <= 0) {
+    if (awardBonus) {
+      shardResult.scoreGained += SHARD_BONUS;
+    }
+
+    world.activeBreaks.splice(index, 1);
+  }
 };
 
 const updateShards = (world: WorldState, dt: number): StepResult => {
@@ -332,6 +359,7 @@ const updateShards = (world: WorldState, dt: number): StepResult => {
 
     if (world.time - shard.bornAt > SHARD_LIFETIME) {
       world.shards.splice(i, 1);
+      consumeBreak(world, shard.breakId, false);
 
       continue;
     }
@@ -380,15 +408,7 @@ const updateShards = (world: WorldState, dt: number): StepResult => {
         shard.eaten = true;
         shardResult.scoreGained += SHARD_SCORE;
         growSnake(world);
-
-        if (world.activeBreak) {
-          world.activeBreak.eaten += 1;
-
-          if (world.activeBreak.eaten >= world.activeBreak.spawned) {
-            shardResult.scoreGained += SHARD_BONUS;
-            world.activeBreak = null;
-          }
-        }
+        consumeBreak(world, shard.breakId, true);
 
         break;
       }

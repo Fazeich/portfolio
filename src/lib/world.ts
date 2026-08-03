@@ -83,7 +83,8 @@ export const createWorld = (): WorldState => {
     shards: [],
     score: 0,
     hp: SNAKE_MAX_HP,
-    activeBreak: null,
+    activeBreaks: [],
+    breakCounter: 0,
     foodSpawnTimer: 0,
     lastBreak: null,
   };
@@ -104,7 +105,8 @@ export const resetWorld = (world: WorldState): void => {
   world.shards = fresh.shards;
   world.score = fresh.score;
   world.hp = fresh.hp;
-  world.activeBreak = fresh.activeBreak;
+  world.activeBreaks = fresh.activeBreaks;
+  world.breakCounter = fresh.breakCounter;
   world.foodSpawnTimer = fresh.foodSpawnTimer;
   world.lastBreak = fresh.lastBreak;
 };

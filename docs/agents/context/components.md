@@ -19,7 +19,7 @@
 - **Effects** (`src/components/Effects`): Ambient dust points + a particle burst pool triggered on shell breaks.
   - `lib/particles.ts`: CPU particle simulation (positions/colors/lifetimes, circle sprite texture).
   - `lib/constants.ts`: Particle counts, speed, lifetime.
-- **Hud** (`src/components/Hud`): DOM overlay — score, best score, HP hearts, boost bar. The boost bar is ref-driven (updated in a `requestAnimationFrame` loop straight from the mutable world, no React re-renders).
+- **Hud** (`src/components/Hud`): DOM overlay — score, best score, HP hearts, boost bar. The boost bar is ref-driven (updated in a `requestAnimationFrame` loop straight from the mutable world, no React re-renders) and exposed as `role="progressbar"`; hearts carry an `aria-label`.
   - `lib/styles.ts`: styled-components for the HUD.
-- **Screens** (`src/components/Screens`): DOM overlays for `menu` / `paused` / `gameover` phases — title, rules, controls, play buttons, social links (react-social-icons). Handles Esc-pause and Space/Enter-start hotkeys.
+- **Screens** (`src/components/Screens`): DOM overlays for `menu` / `paused` / `gameover` phases — title, rules, controls, play buttons, social links (react-social-icons). Handles Esc-pause and Space/Enter-start hotkeys. Dialogs use `role="dialog"` + `aria-modal` and a Tab focus trap (`useFocusTrap`).
   - `lib/styles.ts`: styled-components for screens/panels/buttons.

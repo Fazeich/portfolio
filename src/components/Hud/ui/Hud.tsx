@@ -40,6 +40,7 @@ export const Hud = ({ world }: { world: WorldState }) => {
         fillRef.current.style.width = `${percent}%`;
         fillRef.current.style.background = color;
         fillRef.current.style.boxShadow = `0 0 12px ${color}`;
+        fillRef.current.setAttribute("aria-valuenow", String(percent));
       }
 
       if (percentRef.current) {
@@ -62,13 +63,13 @@ export const Hud = ({ world }: { world: WorldState }) => {
     <div>
       <ScorePanel>
         <ScoreLabel>Счёт</ScoreLabel>
-        <ScoreValue>{score}</ScoreValue>
+        <ScoreValue aria-live="polite">{score}</ScoreValue>
         <BestValue>Рекорд: {best}</BestValue>
       </ScorePanel>
 
-      <HpPanel>
+      <HpPanel role="img" aria-label={`Жизни: ${hp} из ${SNAKE_MAX_HP}`}>
         {Array.from({ length: SNAKE_MAX_HP }).map((_, i) => (
-          <Heart key={i} filled={i < hp}>
+          <Heart key={i} filled={i < hp} aria-hidden="true">
             ♥
           </Heart>
         ))}
@@ -80,7 +81,14 @@ export const Hud = ({ world }: { world: WorldState }) => {
           <span ref={percentRef}>100%</span>
         </BoostLabel>
         <BoostTrack>
-          <BoostFill ref={fillRef} />
+          <BoostFill
+            ref={fillRef}
+            role="progressbar"
+            aria-label="Буст"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={100}
+          />
         </BoostTrack>
       </BoostWrapper>
     </div>

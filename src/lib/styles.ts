@@ -9,6 +9,13 @@ export const GlobalStyle = createGlobalStyle`
     overflow: hidden;
     background: ${({ theme }) => theme.arena.background};
   }
+
+  button:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.ui.accent};
+    outline-offset: 3px;
+  }
 `;
 
 export const PageWrapper = styled.div`

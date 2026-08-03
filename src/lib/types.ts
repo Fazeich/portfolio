@@ -23,7 +23,13 @@ export interface Shard {
   velocity: Vec3;
   radius: number;
   bornAt: number;
+  breakId: number;
   eaten: boolean;
+}
+
+export interface BreakTracker {
+  id: number;
+  remaining: number;
 }
 
 export interface BreakInfo {
@@ -49,7 +55,8 @@ export interface WorldState {
   shards: Shard[];
   score: number;
   hp: number;
-  activeBreak: { spawned: number; eaten: number } | null;
+  activeBreaks: BreakTracker[];
+  breakCounter: number;
   foodSpawnTimer: number;
   lastBreak: BreakInfo | null;
 }

@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { SocialIcon } from "react-social-icons";
 import { useUnit } from "effector-react";
+import { GamePhase } from "@/lib/types";
 import {
   pauseGame,
   resumeGame,
@@ -28,8 +29,72 @@ const SOCIALS = [
   { url: "mailto:vladislavchenko@inbox.ru", network: "mailto" },
 ];
 
+const useFocusTrap = (
+  containerRef: React.RefObject<HTMLDivElement>,
+  phase: GamePhase,
+): void => {
+  const enabled = phase !== "playing";
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const getFocusable = () =>
+      Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const first = getFocusable()[0];
+
+    first?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") {
+        return;
+      }
+
+      const focusable = getFocusable();
+
+      if (focusable.length === 0) {
+        return;
+      }
+
+      const firstEl = focusable[0];
+      const lastEl = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+
+    container.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      container.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [enabled, phase, containerRef]);
+};
+
 export const Screens = () => {
   const { phase, score, best } = useUnit($snake3d);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(overlayRef, phase);
 
   useEffect(() => {
     if (phase !== "playing") {
@@ -81,7 +146,7 @@ export const Screens = () => {
 
   if (phase === "menu") {
     return (
-      <Overlay>
+      <Overlay ref={overlayRef} role="dialog" aria-modal="true" aria-label="Главное меню">
         <Panel>
           <Title>ЗМЕЙКА 3D</Title>
           <Subtitle>Портфолио-игра Владислава Самсонова</Subtitle>
@@ -107,6 +172,7 @@ export const Screens = () => {
                 url={social.url}
                 network={social.network}
                 target="_blank"
+                rel="noopener noreferrer"
               />
             ))}
           </SocialRow>
@@ -117,7 +183,7 @@ export const Screens = () => {
 
   if (phase === "paused") {
     return (
-      <Overlay>
+      <Overlay ref={overlayRef} role="dialog" aria-modal="true" aria-label="Пауза">
         <Panel>
           <Title>Пауза</Title>
           <ButtonRow>
@@ -133,7 +199,7 @@ export const Screens = () => {
 
   if (phase === "gameover") {
     return (
-      <Overlay>
+      <Overlay ref={overlayRef} role="dialog" aria-modal="true" aria-label="Игра окончена">
         <Panel>
           <Title>Игра окончена</Title>
           <ScoreText>

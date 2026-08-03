@@ -16,7 +16,7 @@ The game itself is the portfolio — it demonstrates skills through the gameplay
 - **Wall damage** — hitting a wall with the head costs **1 HP** (3 in total) and reflects the direction along the wall normal.
 - **Boost** — the boost meter drains while accelerating and slowly regenerates.
 - **Best score** — persisted in `localStorage`.
-- **Difficulty** — food spawns more frequently and the food count grows as you progress.
+- **Food respawn** — eaten or broken food is replaced after a short delay, up to 3 items in the arena at once.
 
 ## Controls
 
@@ -43,7 +43,8 @@ The game itself is the portfolio — it demonstrates skills through the gameplay
 - **Effector** — state management for discrete game events
 - **styled-components** — HUD and screen styling, theming
 - **react-social-icons** — social icons in the menu
-- **ESLint** (typescript-eslint, flat config) + **tsc** for type checking
+- **ESLint** (typescript-eslint, flat config) + **tsc** for type checking (strict mode)
+- **Vitest** — unit tests for physics, utils, and the Effector store
 
 ## Project Structure
 
@@ -100,6 +101,7 @@ npm run start      # dev server (http://localhost:3000/portfolio/)
 | `npm run build` | Build the production bundle |
 | `npm run lint` | Run ESLint with auto-fix |
 | `npm run typecheck` | TypeScript type checking |
+| `npm test` | Run unit tests (Vitest) |
 | `npm run deploy` | Deploy to GitHub Pages |
 
 ## Links
