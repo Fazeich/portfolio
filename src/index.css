@@ -10,11 +10,3 @@
 
   user-select: none;
 }
-
-html,
-body,
-#root {
-  height: 100%;
-  overflow: hidden;
-  background: #0a0e17;
-}

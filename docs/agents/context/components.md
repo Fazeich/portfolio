@@ -3,7 +3,7 @@
 ## Page (`src/pages`)
 
 - **SnakePage** (`src/pages/Snake`): The only page. Composes the 3D `<Canvas>` (Arena, Snake, Food, Shards, Effects, CameraRig, lights, Bloom) with DOM overlays (Hud, Screens).
-  - `ui/GameLoop.tsx`: Orchestrates the game loop inside Canvas — syncs phase from the Effector store, resets the world on start, steps physics, dispatches score/HP/boost events.
+  - `ui/GameLoop.tsx`: Orchestrates the game loop inside Canvas — resets the world when the store's `gameId` changes (new game only, not on resume), steps physics, dispatches score/HP/boost events.
   - `ui/PointerTracker.tsx`: Raycasts the mouse pointer onto the arena floor plane and writes the target point into `inputRef` for steering. Mouse steering is active **only while the left mouse button is held** and is **inverted** (the snake steers away from the cursor); releasing LMB stops steering (WASD keeps working).
 
 ## Feature Components (`src/components`)

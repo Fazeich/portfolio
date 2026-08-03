@@ -22,20 +22,17 @@ export const GameLoop = ({
   inputRef: React.RefObject<InputState>;
 }) => {
   const { camera } = useThree();
-  const prevPhase = useRef($snake3d.getState().phase);
+  const prevGameId = useRef($snake3d.getState().gameId);
   const lastBoost = useRef(-1);
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
-    const phase = $snake3d.getState().phase;
+    const { phase, gameId } = $snake3d.getState();
 
-    if (prevPhase.current !== phase) {
-      if (phase === "playing") {
-        resetWorld(world);
-        lastBoost.current = -1;
-      }
-
-      prevPhase.current = phase;
+    if (prevGameId.current !== gameId) {
+      resetWorld(world);
+      lastBoost.current = -1;
+      prevGameId.current = gameId;
     }
 
     if (phase !== "playing" || !inputRef.current) {

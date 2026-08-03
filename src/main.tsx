@@ -4,6 +4,7 @@ import { ThemeProvider } from "styled-components";
 import { SnakePage } from "@/pages/Snake";
 import { GlobalStyle } from "@/lib/styles";
 import { GAME_THEME } from "@/lib/theme";
+import "@/index.css";
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>

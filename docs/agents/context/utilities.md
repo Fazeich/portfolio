@@ -9,12 +9,13 @@
 - **physics.ts** (`src/lib/physics.ts`): Hand-rolled physics — `stepWorld()` (movement, steering with `MAX_TURN_RATE`, wall reflection + HP damage, ram detection, shard integration/pickup, food spawning), `isGameOver()`, `segmentRadius()`. Returns a `StepResult` (score gained / damage taken).
 - **hooks.ts** (`src/lib/hooks.ts`): React hooks — `useInputRef()` (shared mutable input), `useKeyboardInput()` (WASD/arrows + Space boost), `useIsMobile()`.
 - **styles.ts** (`src/lib/styles.ts`): `GlobalStyle` and `PageWrapper` (full-screen layout, dark background).
+- **index.css** (`src/index.css`): Global reset + `Exo 2` font import, imported in `src/main.tsx`.
 - **theme.ts** (`src/lib/theme.ts`): Mock theme object `GAME_THEME` (arena/snake/food/ui tokens). To be refined later.
 
 ## State Management (Stores) (`src/stores`)
 
 - **snake3d** (`src/stores/snake3d`): Effector store for the game UI state.
-  - `snake3d.ts`: `$snake3d` store — phase, score, hp, boost, best (persisted in localStorage).
+  - `snake3d.ts`: `$snake3d` store — phase, gameId (increments on every `startGame`, used to trigger world reset), score, hp, boost, best (persisted in localStorage).
   - `events.ts`: `startGame`, `gameOver`, `toMenu`, `pauseGame`, `resumeGame`, `addScore`, `damageSnake`, `setBoost`.
   - `types.ts`: `ISnake3DStore` interface.
 

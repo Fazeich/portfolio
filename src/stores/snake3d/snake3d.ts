@@ -33,6 +33,7 @@ const saveBest = (value: number): void => {
 
 const initialState = (): ISnake3DStore => ({
   phase: "menu",
+  gameId: 0,
   score: 0,
   hp: 3,
   boost: 100,
@@ -40,9 +41,10 @@ const initialState = (): ISnake3DStore => ({
 });
 
 export const $snake3d = createStore<ISnake3DStore>(initialState())
-  .on(startGame, () => ({
+  .on(startGame, (state) => ({
     ...initialState(),
     phase: "playing",
+    gameId: state.gameId + 1,
   }))
   .on(addScore, (state, gained) => {
     const score = state.score + gained;
