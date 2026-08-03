@@ -49,7 +49,7 @@ export const SnakePage = () => {
         </EffectComposer>
       </Canvas>
 
-      <Hud />
+      <Hud world={world} />
       <Screens />
     </PageWrapper>
   );

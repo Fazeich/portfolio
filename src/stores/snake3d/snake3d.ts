@@ -5,7 +5,6 @@ import {
   gameOver,
   pauseGame,
   resumeGame,
-  setBoost,
   startGame,
   toMenu,
 } from "@/stores/snake3d/events";
@@ -36,7 +35,6 @@ const initialState = (): ISnake3DStore => ({
   gameId: 0,
   score: 0,
   hp: 3,
-  boost: 100,
   best: loadBest(),
 });
 
@@ -58,7 +56,6 @@ export const $snake3d = createStore<ISnake3DStore>(initialState())
     ...state,
     hp: Math.max(0, state.hp - 1),
   }))
-  .on(setBoost, (state, boost) => ({ ...state, boost }))
   .on(pauseGame, (state) => ({ ...state, phase: "paused" }))
   .on(resumeGame, (state) => ({ ...state, phase: "playing" }))
   .on(toMenu, (state) => ({ ...state, phase: "menu" }))

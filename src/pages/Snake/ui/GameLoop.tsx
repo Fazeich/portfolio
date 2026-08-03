@@ -9,7 +9,6 @@ import {
   addScore,
   damageSnake,
   gameOver,
-  setBoost,
 } from "@/stores/snake3d/events";
 
 const forwardVector = new THREE.Vector3();
@@ -23,7 +22,6 @@ export const GameLoop = ({
 }) => {
   const { camera } = useThree();
   const prevGameId = useRef($snake3d.getState().gameId);
-  const lastBoost = useRef(-1);
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05);
@@ -31,7 +29,6 @@ export const GameLoop = ({
 
     if (prevGameId.current !== gameId) {
       resetWorld(world);
-      lastBoost.current = -1;
       prevGameId.current = gameId;
     }
 
@@ -55,13 +52,6 @@ export const GameLoop = ({
       gameOver();
 
       return;
-    }
-
-    const roundedBoost = Math.round(world.snake.boost);
-
-    if (roundedBoost !== lastBoost.current) {
-      lastBoost.current = roundedBoost;
-      setBoost(roundedBoost);
     }
   });
 

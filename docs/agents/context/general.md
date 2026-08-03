@@ -36,5 +36,5 @@ To maintain consistency, every component follows this structure:
 ## Game Architecture (key decisions)
 - **Mutable world state** (`src/lib/world.ts`) is the single source of truth for gameplay and lives in refs — no React re-renders per frame.
 - **Physics** (`src/lib/physics.ts`) is hand-rolled (no physics engine): follow-the-leader chain, plane reflections, ram detection, shard physics.
-- **Effector** handles only discrete UI events: phase, score, HP, boost meter, best score (localStorage).
+- **Effector** handles only discrete UI events: phase, score, HP, best score (localStorage).
 - **Game loop** runs inside the Canvas via `useFrame` (`src/pages/Snake/ui/GameLoop.tsx`); input raycast for mouse lives in `PointerTracker.tsx`.

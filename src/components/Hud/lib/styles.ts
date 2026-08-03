@@ -83,14 +83,9 @@ export const BoostTrack = styled.div`
   overflow: hidden;
 `;
 
-export const BoostFill = styled.div<{ ratio: number; boosting: boolean }>`
+export const BoostFill = styled.div`
   height: 100%;
-  width: ${({ ratio }) => Math.max(0, Math.min(100, ratio * 100))}%;
+  width: 100%;
   border-radius: 6px;
-  background: ${({ theme, boosting }) =>
-    boosting ? theme.ui.boost : theme.ui.accent};
-  box-shadow: 0 0 12px
-    ${({ theme, boosting }) =>
-      boosting ? theme.ui.boost : theme.ui.accent};
-  transition: width 0.1s linear, background 0.2s;
+  background: ${({ theme }) => theme.ui.accent};
 `;

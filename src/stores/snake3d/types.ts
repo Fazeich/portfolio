@@ -5,6 +5,5 @@ export interface ISnake3DStore {
   gameId: number;
   score: number;
   hp: number;
-  boost: number;
   best: number;
 }

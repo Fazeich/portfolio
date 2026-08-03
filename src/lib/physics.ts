@@ -34,8 +34,6 @@ import { InputState, Shard, Vec3, WorldState } from "@/lib/types";
 import {
   clamp,
   distance3,
-  normalizeXZ,
-  rotateY,
   shortestAngle,
 } from "@/lib/utils";
 import { nextId, spawnFood } from "@/lib/world";
@@ -48,6 +46,10 @@ export interface StepResult {
 const halfW = ARENA_WIDTH / 2;
 const halfD = ARENA_DEPTH / 2;
 
+const moveResult: StepResult = { scoreGained: 0, damageTaken: false };
+const shardResult: StepResult = { scoreGained: 0, damageTaken: false };
+const stepResult: StepResult = { scoreGained: 0, damageTaken: false };
+
 const updateDesiredHeading = (
   world: WorldState,
   input: InputState,
@@ -56,17 +58,16 @@ const updateDesiredHeading = (
   const hasWASD = input.wasdDir.x !== 0 || input.wasdDir.z !== 0;
 
   if (hasWASD) {
-    const forward = normalizeXZ(cameraForward);
-    const right = rotateY(forward, Math.PI / 2);
-    const dir: Vec3 = {
-      x: forward.x * input.wasdDir.z + right.x * input.wasdDir.x,
-      y: 0,
-      z: forward.z * input.wasdDir.z + right.z * input.wasdDir.x,
-    };
-    const normalized = normalizeXZ(dir);
+    const { x: cx, z: cz } = cameraForward;
+    const flen = Math.sqrt(cx * cx + cz * cz);
+    const fx = flen > 0 ? cx / flen : 0;
+    const fz = flen > 0 ? cz / flen : 0;
+    const dx = fx * input.wasdDir.z + fz * input.wasdDir.x;
+    const dz = fz * input.wasdDir.z - fx * input.wasdDir.x;
+    const dlen = Math.sqrt(dx * dx + dz * dz);
 
-    if (normalized.x !== 0 || normalized.z !== 0) {
-      world.snake.desiredHeading = normalized;
+    if (dlen > 0) {
+      world.snake.desiredHeading = { x: dx / dlen, y: 0, z: dz / dlen };
     }
 
     return;
@@ -74,15 +75,12 @@ const updateDesiredHeading = (
 
   if (input.pointerActive) {
     const head = world.snake.positions[0];
-    const toPointer: Vec3 = {
-      x: head.x - input.pointerPoint.x,
-      y: 0,
-      z: head.z - input.pointerPoint.z,
-    };
-    const normalized = normalizeXZ(toPointer);
+    const dx = head.x - input.pointerPoint.x;
+    const dz = head.z - input.pointerPoint.z;
+    const dlen = Math.sqrt(dx * dx + dz * dz);
 
-    if (normalized.x !== 0 || normalized.z !== 0) {
-      world.snake.desiredHeading = normalized;
+    if (dlen > 0) {
+      world.snake.desiredHeading = { x: dx / dlen, y: 0, z: dz / dlen };
     }
 
     return;
@@ -96,58 +94,58 @@ const turnSnake = (world: WorldState, dt: number): void => {
   const angle = shortestAngle(heading, desiredHeading);
   const step = clamp(angle, -MAX_TURN_RATE * dt, MAX_TURN_RATE * dt);
 
-  world.snake.heading = normalizeXZ(rotateY(heading, step));
+  if (step !== 0) {
+    const cos = Math.cos(step);
+    const sin = Math.sin(step);
+    const nx = heading.x * cos + heading.z * sin;
+    heading.z = -heading.x * sin + heading.z * cos;
+    heading.x = nx;
+  }
 };
 
 const moveHead = (world: WorldState, dt: number): StepResult => {
   const head = world.snake.positions[0];
   const { heading, speed } = world.snake;
-  const result: StepResult = { scoreGained: 0, damageTaken: false };
+
+  moveResult.scoreGained = 0;
+  moveResult.damageTaken = false;
 
   head.x += heading.x * speed * dt;
   head.z += heading.z * speed * dt;
-
-  const reflectX = () => {
-    heading.x = -heading.x;
-    world.snake.desiredHeading = { ...heading };
-    head.x = clamp(head.x, -halfW + HEAD_RADIUS, halfW - HEAD_RADIUS);
-  };
-
-  const reflectZ = () => {
-    heading.z = -heading.z;
-    world.snake.desiredHeading = { ...heading };
-    head.z = clamp(head.z, -halfD + HEAD_RADIUS, halfD - HEAD_RADIUS);
-  };
 
   let hitWall = false;
 
   if (head.x < -halfW + HEAD_RADIUS) {
     head.x = -halfW + HEAD_RADIUS + WALL_KNOCKBACK;
-    reflectX();
+    heading.x = -heading.x;
+    world.snake.desiredHeading = { ...heading };
     hitWall = true;
   } else if (head.x > halfW - HEAD_RADIUS) {
     head.x = halfW - HEAD_RADIUS - WALL_KNOCKBACK;
-    reflectX();
+    heading.x = -heading.x;
+    world.snake.desiredHeading = { ...heading };
     hitWall = true;
   }
 
   if (head.z < -halfD + HEAD_RADIUS) {
     head.z = -halfD + HEAD_RADIUS + WALL_KNOCKBACK;
-    reflectZ();
+    heading.z = -heading.z;
+    world.snake.desiredHeading = { ...heading };
     hitWall = true;
   } else if (head.z > halfD - HEAD_RADIUS) {
     head.z = halfD - HEAD_RADIUS - WALL_KNOCKBACK;
-    reflectZ();
+    heading.z = -heading.z;
+    world.snake.desiredHeading = { ...heading };
     hitWall = true;
   }
 
   if (hitWall && world.time >= world.snake.invulnUntil) {
     world.hp = Math.max(0, world.hp - 1);
     world.snake.invulnUntil = world.time + INVULN_TIME;
-    result.damageTaken = true;
+    moveResult.damageTaken = true;
   }
 
-  return result;
+  return moveResult;
 };
 
 const updateChain = (world: WorldState): void => {
@@ -162,11 +160,8 @@ const updateChain = (world: WorldState): void => {
 
     if (len > 0) {
       const ratio = SEGMENT_SPACING / len;
-      positions[i] = {
-        x: prev.x + dx * ratio,
-        y: prev.y,
-        z: prev.z + dz * ratio,
-      };
+      cur.x = prev.x + dx * ratio;
+      cur.z = prev.z + dz * ratio;
     }
   }
 };
@@ -198,8 +193,7 @@ const updateBoost = (world: WorldState, input: InputState, dt: number): void => 
   }
 };
 
-const updateFoods = (world: WorldState, dt: number): StepResult => {
-  const result: StepResult = { scoreGained: 0, damageTaken: false };
+const updateFoods = (world: WorldState, dt: number): void => {
   const head = world.snake.positions[0];
 
   for (let i = world.foods.length - 1; i >= 0; i -= 1) {
@@ -243,14 +237,10 @@ const updateFoods = (world: WorldState, dt: number): StepResult => {
     const distance = distance3(head, food.position);
 
     if (distance < HEAD_RADIUS + FOOD_SHELL_RADIUS) {
-      const snakeVelocity: Vec3 = {
-        x: world.snake.heading.x * world.snake.speed,
-        y: 0,
-        z: world.snake.heading.z * world.snake.speed,
-      };
+      const svx = world.snake.heading.x * world.snake.speed;
+      const svz = world.snake.heading.z * world.snake.speed;
       const relativeSpeed = Math.sqrt(
-        (snakeVelocity.x - food.velocity.x) ** 2 +
-          (snakeVelocity.z - food.velocity.z) ** 2,
+        (svx - food.velocity.x) ** 2 + (svz - food.velocity.z) ** 2,
       );
 
       if (relativeSpeed >= SHELL_BREAK_SPEED) {
@@ -258,21 +248,19 @@ const updateFoods = (world: WorldState, dt: number): StepResult => {
         world.foods.splice(i, 1);
         world.foodSpawnTimer = FOOD_SPAWN_DELAY;
       } else {
-        const dir = normalizeXZ({
-          x: food.position.x - head.x,
-          y: 0,
-          z: food.position.z - head.z,
-        });
+        const dx = food.position.x - head.x;
+        const dz = food.position.z - head.z;
+        const dlen = Math.sqrt(dx * dx + dz * dz);
+        const nx = dlen > 0 ? dx / dlen : 1;
+        const nz = dlen > 0 ? dz / dlen : 0;
         food.velocity = {
-          x: (dir.x || 1) * 4,
+          x: (nx || 1) * 4,
           y: 4,
-          z: (dir.z || 0) * 4,
+          z: (nz || 0) * 4,
         };
       }
     }
   }
-
-  return result;
 };
 
 const breakFood = (world: WorldState, food: { position: Vec3 }): void => {
@@ -308,7 +296,8 @@ const breakFood = (world: WorldState, food: { position: Vec3 }): void => {
 };
 
 const updateShards = (world: WorldState, dt: number): StepResult => {
-  const result: StepResult = { scoreGained: 0, damageTaken: false };
+  shardResult.scoreGained = 0;
+  shardResult.damageTaken = false;
 
   for (let i = world.shards.length - 1; i >= 0; i -= 1) {
     const shard = world.shards[i];
@@ -357,19 +346,20 @@ const updateShards = (world: WorldState, dt: number): StepResult => {
       continue;
     }
 
-    const eatableSegments = world.snake.positions.slice(0, 4);
+    const positions = world.snake.positions;
+    const eatableCount = Math.min(4, positions.length);
 
-    for (const segment of eatableSegments) {
-      if (distance3(segment, shard.position) < HEAD_RADIUS + shard.radius) {
+    for (let j = 0; j < eatableCount; j += 1) {
+      if (distance3(positions[j], shard.position) < HEAD_RADIUS + shard.radius) {
         shard.eaten = true;
-        result.scoreGained += SHARD_SCORE;
+        shardResult.scoreGained += SHARD_SCORE;
         growSnake(world);
 
         if (world.activeBreak) {
           world.activeBreak.eaten += 1;
 
           if (world.activeBreak.eaten >= world.activeBreak.spawned) {
-            result.scoreGained += SHARD_BONUS;
+            shardResult.scoreGained += SHARD_BONUS;
             world.activeBreak = null;
           }
         }
@@ -379,7 +369,7 @@ const updateShards = (world: WorldState, dt: number): StepResult => {
     }
   }
 
-  return result;
+  return shardResult;
 };
 
 const spawnFoods = (world: WorldState, dt: number): void => {
@@ -407,16 +397,16 @@ export const stepWorld = (
   turnSnake(world, dt);
   updateBoost(world, input, dt);
 
-  const moveResult = moveHead(world, dt);
+  moveHead(world, dt);
   updateChain(world);
   updateFoods(world, dt);
-  const shardResult = updateShards(world, dt);
+  updateShards(world, dt);
   spawnFoods(world, dt);
 
-  return {
-    scoreGained: shardResult.scoreGained,
-    damageTaken: moveResult.damageTaken,
-  };
+  stepResult.scoreGained = shardResult.scoreGained;
+  stepResult.damageTaken = moveResult.damageTaken;
+
+  return stepResult;
 };
 
 export const isGameOver = (world: WorldState): boolean => world.hp <= 0;

@@ -13,13 +13,13 @@
 - **Snake** (`src/components/Snake`): Renders the snake as an `InstancedMesh` pool (head + chain), synced from world state each frame. Per-segment colors (head→tail gradient) and orientation.
   - `lib/render.ts`: Per-frame matrix/color sync for the instanced chain.
 - **Food** (`src/components/Food`): Renders "protected" food — translucent shell sphere with a glowing core. Pool of `MAX_FOODS` slots synced from world state.
-- **Shards** (`src/components/Shards`): Renders shard pickups as a pool of octahedrons. Edible shards glow amber; inert (just-broken) shards are dim and translucent.
+- **Shards** (`src/components/Shards`): Renders shard pickups as a single `InstancedMesh` octahedron pool (1 draw call). Per-instance colors distinguish edible (amber, from theme) from inert just-broken (gray).
 - **CameraRig** (`src/components/CameraRig`): Follow camera behind the head with smoothing, FOV kick on boost, orbit mode on the menu screen.
   - `lib/constants.ts`: Camera offsets, FOV values, orbit params.
 - **Effects** (`src/components/Effects`): Ambient dust points + a particle burst pool triggered on shell breaks.
   - `lib/particles.ts`: CPU particle simulation (positions/colors/lifetimes, circle sprite texture).
   - `lib/constants.ts`: Particle counts, speed, lifetime.
-- **Hud** (`src/components/Hud`): DOM overlay — score, best score, HP hearts, boost bar. Visible during play/pause.
+- **Hud** (`src/components/Hud`): DOM overlay — score, best score, HP hearts, boost bar. The boost bar is ref-driven (updated in a `requestAnimationFrame` loop straight from the mutable world, no React re-renders).
   - `lib/styles.ts`: styled-components for the HUD.
 - **Screens** (`src/components/Screens`): DOM overlays for `menu` / `paused` / `gameover` phases — title, rules, controls, play buttons, social links (react-social-icons). Handles Esc-pause and Space/Enter-start hotkeys.
   - `lib/styles.ts`: styled-components for screens/panels/buttons.
