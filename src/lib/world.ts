@@ -11,7 +11,9 @@ import {
   START_SEGMENTS,
 } from "@/lib/constants";
 import { InputState, Vec3, WorldState } from "@/lib/types";
-import { distance3 } from "@/lib/utils";const START_HEADING: Vec3 = { x: 1, y: 0, z: 0 };
+import { distance3 } from "@/lib/utils";
+
+const START_HEADING: Vec3 = { x: 1, y: 0, z: 0 };
 
 export const createInput = (): InputState => ({
   pointerActive: false,
@@ -56,10 +58,8 @@ export const spawnFood = (world: WorldState): void => {
 
     if (distance3(position, head) > FOOD_MIN_DIST_FROM_SNAKE) {
       world.foods.push({
-        id: nextId(world),
         position,
         velocity: { x: 0, y: 0, z: 0 },
-        shellActive: true,
       });
 
       return;
@@ -86,7 +86,6 @@ export const createWorld = (): WorldState => {
     activeBreak: null,
     foodSpawnTimer: 0,
     lastBreak: null,
-    idCounter: 0,
   };
 
   for (let i = 0; i < MAX_FOODS; i += 1) {
@@ -108,11 +107,4 @@ export const resetWorld = (world: WorldState): void => {
   world.activeBreak = fresh.activeBreak;
   world.foodSpawnTimer = fresh.foodSpawnTimer;
   world.lastBreak = fresh.lastBreak;
-  world.idCounter = fresh.idCounter;
-};
-
-export const nextId = (world: WorldState): number => {
-  world.idCounter += 1;
-
-  return world.idCounter;
 };

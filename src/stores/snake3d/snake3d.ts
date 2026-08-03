@@ -38,6 +38,14 @@ const initialState = (): ISnake3DStore => ({
   best: loadBest(),
 });
 
+const updateBest = (state: ISnake3DStore, score: number): number => {
+  const best = score > state.best ? score : state.best;
+
+  saveBest(best);
+
+  return best;
+};
+
 export const $snake3d = createStore<ISnake3DStore>(initialState())
   .on(startGame, (state) => ({
     ...initialState(),
@@ -46,11 +54,8 @@ export const $snake3d = createStore<ISnake3DStore>(initialState())
   }))
   .on(addScore, (state, gained) => {
     const score = state.score + gained;
-    const best = score > state.best ? score : state.best;
 
-    saveBest(best);
-
-    return { ...state, score, best };
+    return { ...state, score, best: updateBest(state, score) };
   })
   .on(damageSnake, (state) => ({
     ...state,
@@ -59,10 +64,8 @@ export const $snake3d = createStore<ISnake3DStore>(initialState())
   .on(pauseGame, (state) => ({ ...state, phase: "paused" }))
   .on(resumeGame, (state) => ({ ...state, phase: "playing" }))
   .on(toMenu, (state) => ({ ...state, phase: "menu" }))
-  .on(gameOver, (state) => {
-    const best = state.score > state.best ? state.score : state.best;
-
-    saveBest(best);
-
-    return { ...state, phase: "gameover", best };
-  });
+  .on(gameOver, (state) => ({
+    ...state,
+    phase: "gameover",
+    best: updateBest(state, state.score),
+  }));

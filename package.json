@@ -4,7 +4,6 @@
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "main": "main.tsx",
   "scripts": {
     "start": "vite --config configs/vite.config.ts",
     "build": "vite build --config configs/vite.config.ts",
@@ -43,9 +42,6 @@
     "typescript": "5.7.3",
     "typescript-eslint": "8.18.0",
     "vite": "^6.0.5"
-  },
-  "resolutions": {
-    "styled-components": "^5"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.9.5"

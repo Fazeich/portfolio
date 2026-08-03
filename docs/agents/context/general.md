@@ -10,7 +10,7 @@ This project is a personal portfolio built as a **3D Snake game**. The game itse
 - **3D Rendering**: `three` + `@react-three/fiber` (Canvas, useFrame), `@react-three/drei` (Grid, Edges), `@react-three/postprocessing` (Bloom)
 - **Styling**: `styled-components` for HUD/DOM overlays + a mock theme system (to be refined later)
 - **Icons**: `react-social-icons` (menu links, decorative icons)
-- **Other**: `lodash` (uniqueId), `gh-pages` (deploy)
+- **Other**: `gh-pages` (deploy)
 
 ## Architecture
 The project follows a modular structure based on Feature-Sliced Design (FSD) principles. **Strict adherence to the current folder structure and hierarchy is mandatory.**

@@ -14,14 +14,11 @@ export interface InputState {
 }
 
 export interface FoodEntity {
-  id: number;
   position: Vec3;
   velocity: Vec3;
-  shellActive: boolean;
 }
 
 export interface Shard {
-  id: number;
   position: Vec3;
   velocity: Vec3;
   radius: number;
@@ -55,5 +52,4 @@ export interface WorldState {
   activeBreak: { spawned: number; eaten: number } | null;
   foodSpawnTimer: number;
   lastBreak: BreakInfo | null;
-  idCounter: number;
 }

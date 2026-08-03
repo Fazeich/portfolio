@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { createInput } from "@/lib/world";
 import { InputState } from "@/lib/types";
 
@@ -111,16 +111,4 @@ export const useKeyboardInput = (
       window.removeEventListener("blur", onBlur);
     };
   }, [inputRef]);
-};
-
-export const useIsMobile = (): boolean => {
-  const isMobile = useMemo(
-    () =>
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      ),
-    [],
-  );
-
-  return isMobile;
 };

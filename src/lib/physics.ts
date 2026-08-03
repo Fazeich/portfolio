@@ -36,7 +36,7 @@ import {
   distance3,
   shortestAngle,
 } from "@/lib/utils";
-import { nextId, spawnFood } from "@/lib/world";
+import { spawnFood } from "@/lib/world";
 
 export interface StepResult {
   scoreGained: number;
@@ -49,6 +49,25 @@ const halfD = ARENA_DEPTH / 2;
 const moveResult: StepResult = { scoreGained: 0, damageTaken: false };
 const shardResult: StepResult = { scoreGained: 0, damageTaken: false };
 const stepResult: StepResult = { scoreGained: 0, damageTaken: false };
+
+const reflectAxis = (
+  position: Vec3,
+  velocity: Vec3,
+  axis: "x" | "y" | "z",
+  min: number,
+  max: number,
+  restitution: number,
+): void => {
+  const value = position[axis];
+
+  if (value < min) {
+    position[axis] = min;
+    velocity[axis] = -velocity[axis] * restitution;
+  } else if (value > max) {
+    position[axis] = max;
+    velocity[axis] = -velocity[axis] * restitution;
+  }
+};
 
 const updateDesiredHeading = (
   world: WorldState,
@@ -207,26 +226,30 @@ const updateFoods = (world: WorldState, dt: number): void => {
       food.position.y += food.velocity.y * dt;
       food.position.z += food.velocity.z * dt;
 
-      if (food.position.y < FOOD_RADIUS) {
-        food.position.y = FOOD_RADIUS;
-        food.velocity.y = -food.velocity.y * SHARD_RESTITUTION;
-      }
-
-      if (food.position.x < -halfW + FOOD_RADIUS) {
-        food.position.x = -halfW + FOOD_RADIUS;
-        food.velocity.x = -food.velocity.x * SHARD_RESTITUTION;
-      } else if (food.position.x > halfW - FOOD_RADIUS) {
-        food.position.x = halfW - FOOD_RADIUS;
-        food.velocity.x = -food.velocity.x * SHARD_RESTITUTION;
-      }
-
-      if (food.position.z < -halfD + FOOD_RADIUS) {
-        food.position.z = -halfD + FOOD_RADIUS;
-        food.velocity.z = -food.velocity.z * SHARD_RESTITUTION;
-      } else if (food.position.z > halfD - FOOD_RADIUS) {
-        food.position.z = halfD - FOOD_RADIUS;
-        food.velocity.z = -food.velocity.z * SHARD_RESTITUTION;
-      }
+      reflectAxis(
+        food.position,
+        food.velocity,
+        "y",
+        FOOD_RADIUS,
+        Number.POSITIVE_INFINITY,
+        SHARD_RESTITUTION,
+      );
+      reflectAxis(
+        food.position,
+        food.velocity,
+        "x",
+        -halfW + FOOD_RADIUS,
+        halfW - FOOD_RADIUS,
+        SHARD_RESTITUTION,
+      );
+      reflectAxis(
+        food.position,
+        food.velocity,
+        "z",
+        -halfD + FOOD_RADIUS,
+        halfD - FOOD_RADIUS,
+        SHARD_RESTITUTION,
+      );
 
       if (Math.abs(food.velocity.x) < 0.15 && food.velocity.y < 0.15) {
         food.velocity.x = 0;
@@ -272,7 +295,6 @@ const breakFood = (world: WorldState, food: { position: Vec3 }): void => {
     const angle = Math.random() * Math.PI * 2;
     const radial = SHARD_SPEED * (0.5 + Math.random() * 0.7);
     const shard: Shard = {
-      id: nextId(world),
       position: { ...food.position },
       velocity: {
         x: Math.cos(angle) * radial,
@@ -319,26 +341,30 @@ const updateShards = (world: WorldState, dt: number): StepResult => {
     shard.position.y += shard.velocity.y * dt;
     shard.position.z += shard.velocity.z * dt;
 
-    if (shard.position.y < shard.radius) {
-      shard.position.y = shard.radius;
-      shard.velocity.y = -shard.velocity.y * SHARD_RESTITUTION;
-    }
-
-    if (shard.position.x < -halfW + shard.radius) {
-      shard.position.x = -halfW + shard.radius;
-      shard.velocity.x = -shard.velocity.x * SHARD_RESTITUTION;
-    } else if (shard.position.x > halfW - shard.radius) {
-      shard.position.x = halfW - shard.radius;
-      shard.velocity.x = -shard.velocity.x * SHARD_RESTITUTION;
-    }
-
-    if (shard.position.z < -halfD + shard.radius) {
-      shard.position.z = -halfD + shard.radius;
-      shard.velocity.z = -shard.velocity.z * SHARD_RESTITUTION;
-    } else if (shard.position.z > halfD - shard.radius) {
-      shard.position.z = halfD - shard.radius;
-      shard.velocity.z = -shard.velocity.z * SHARD_RESTITUTION;
-    }
+    reflectAxis(
+      shard.position,
+      shard.velocity,
+      "y",
+      shard.radius,
+      Number.POSITIVE_INFINITY,
+      SHARD_RESTITUTION,
+    );
+    reflectAxis(
+      shard.position,
+      shard.velocity,
+      "x",
+      -halfW + shard.radius,
+      halfW - shard.radius,
+      SHARD_RESTITUTION,
+    );
+    reflectAxis(
+      shard.position,
+      shard.velocity,
+      "z",
+      -halfD + shard.radius,
+      halfD - shard.radius,
+      SHARD_RESTITUTION,
+    );
 
     const inert = world.time - shard.bornAt < SHARD_INERT_TIME;
 

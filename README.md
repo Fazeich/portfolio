@@ -69,7 +69,7 @@ src/
     utils.ts                    # vector/angle helpers
     world.ts                    # mutable world state (createWorld, resetWorld)
     physics.ts                  # physics: movement, ram, shards, reflections
-    hooks.ts                    # useInputRef, useKeyboardInput, useIsMobile
+    hooks.ts                    # useInputRef, useKeyboardInput
     theme.ts                    # mock theme (arena/snake/food/UI tokens)
     styles.ts                   # GlobalStyle, PageWrapper
   stores/

@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "strict": false,
+    "strict": true,
     "paths": {
       "@/*": ["src/*"]
     },
