@@ -4,6 +4,9 @@ A personal portfolio built as a **3D Snake game** with a unique mechanic: the sn
 
 The game itself is the portfolio — it demonstrates skills through the gameplay and the quality of the code, without an explicit "skills" section.
 
+- **Homepage** (`/`) — portfolio placeholder with a link to the game.
+- **Snake game** (`/snake`) — the 3D arena.
+
 ## Gameplay Mechanics
 
 - **Free movement at any angle** — the snake is not bound to a grid; turns are smooth.

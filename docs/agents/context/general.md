@@ -9,7 +9,13 @@ This project is a personal portfolio built as a **3D Snake game**. The game itse
 - **State Management**: Effector (discrete game events only)
 - **3D Rendering**: `three` + `@react-three/fiber` (Canvas, useFrame), `@react-three/drei` (Grid, Edges), `@react-three/postprocessing` (Bloom)
 - **Styling**: `styled-components` for HUD/DOM overlays + a mock theme system (to be refined later)
+- **Routing**: `react-router-dom` (BrowserRouter, basename `/portfolio`)
 - **Icons**: `react-social-icons` (menu links, decorative icons)
+
+## Routes
+- `/` — Portfolio placeholder page (white screen, link to snake game)
+- `/snake` — 3D Snake game
+- GitHub Pages SPA fallback via `dist/404.html` copy of `index.html`
 - **Other**: `gh-pages` (deploy)
 
 ## Architecture

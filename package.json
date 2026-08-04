@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview",
-    "predeploy": "npm run build",
+    "predeploy": "npm run build && copy dist\\index.html dist\\404.html",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "jiti": "^2.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.2",
     "react-social-icons": "^6.22.0",
     "styled-components": "^6.1.14",
     "three": "^0.172.0"
