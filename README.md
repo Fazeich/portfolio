@@ -14,7 +14,7 @@ The game itself is the portfolio — it demonstrates skills through the gameplay
 - **Shards** — broken food bursts into **1–3 shards** that bounce off walls and the floor; collect them for score and snake growth.
 - **Break bonus** — eating all the shards from a single break grants a bonus.
 - **Wall damage** — hitting a wall with the head costs **1 HP** (3 in total) and reflects the direction along the wall normal.
-- **Boost** — the boost meter drains while accelerating and slowly regenerates.
+- **Boost** — the boost meter drains while accelerating and slowly regenerates after a short cooldown; it cannot start below a minimum charge.
 - **Best score** — persisted in `localStorage`.
 - **Food respawn** — eaten or broken food is replaced after a short delay, up to 3 items in the arena at once.
 

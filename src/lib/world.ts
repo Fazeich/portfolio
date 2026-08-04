@@ -23,7 +23,7 @@ export const createInput = (): InputState => ({
 });
 
 const makeHead = (): Vec3 => ({
-  x: -ARENA_WIDTH / 2 + HEAD_RADIUS * 4,
+  x: 0,
   y: HEAD_RADIUS,
   z: 0,
 });
@@ -77,6 +77,7 @@ export const createWorld = (): WorldState => {
       speed: 0,
       boost: BOOST_MAX,
       boosting: false,
+      boostCooldown: 0,
       invulnUntil: 0,
     },
     foods: [],

@@ -3,6 +3,8 @@ import {
   ARENA_WIDTH,
   BOOST_DRAIN,
   BOOST_MAX,
+  BOOST_COOLDOWN,
+  BOOST_MIN,
   BOOST_REGEN,
   FOOD_RADIUS,
   FOOD_SHELL_RADIUS,
@@ -200,16 +202,27 @@ const growSnake = (world: WorldState): void => {
 
 const updateBoost = (world: WorldState, input: InputState, dt: number): void => {
   const { snake } = world;
-  const wantsBoost = input.boosting && snake.boost > 0;
+  const wasBoosting = snake.boosting;
 
-  snake.boosting = wantsBoost;
-  snake.speed = wantsBoost ? SNAKE_BOOST_SPEED : SNAKE_SPEED;
+  snake.boostCooldown = Math.max(0, snake.boostCooldown - dt);
+
+  const wantsBoost =
+    input.boosting &&
+    snake.boost > 0 &&
+    (snake.boosting || (snake.boost >= BOOST_MIN && snake.boostCooldown <= 0));
+
+  if (wasBoosting && !wantsBoost) {
+    snake.boostCooldown = BOOST_COOLDOWN;
+  }
 
   if (wantsBoost) {
     snake.boost = Math.max(0, snake.boost - BOOST_DRAIN * dt);
-  } else {
+  } else if (snake.boostCooldown <= 0) {
     snake.boost = Math.min(BOOST_MAX, snake.boost + BOOST_REGEN * dt);
   }
+
+  snake.boosting = wantsBoost;
+  snake.speed = wantsBoost ? SNAKE_BOOST_SPEED : SNAKE_SPEED;
 };
 
 const updateFoods = (world: WorldState, dt: number): void => {

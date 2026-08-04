@@ -12,7 +12,6 @@ const dirVec = new THREE.Vector3();
 const colorA = new THREE.Color();
 const colorB = new THREE.Color();
 const colorTemp = new THREE.Color();
-const lastCount = { value: 0 };
 
 export interface SnakePalette {
   head: string;
@@ -61,12 +60,10 @@ export const syncSnakeMesh = (
     mesh.setColorAt(i, colorTemp);
   }
 
-  for (let i = count; i < lastCount.value; i += 1) {
+  for (let i = count; i < mesh.count; i += 1) {
     matrix.makeScale(0, 0, 0);
     mesh.setMatrixAt(i, matrix);
   }
-
-  lastCount.value = count;
 
   mesh.instanceMatrix.needsUpdate = true;
 

@@ -8,13 +8,15 @@ export const MAX_TURN_RATE = 2.2;
 export const SEGMENT_SPACING = 0.9;
 export const HEAD_RADIUS = 0.6;
 export const SEGMENT_RADIUS = 0.5;
-export const START_SEGMENTS = 12;
+export const START_SEGMENTS = 3;
 export const GROWTH_PER_SHARD = 2;
 export const MAX_SEGMENTS = 220;
 
 export const BOOST_MAX = 100;
 export const BOOST_DRAIN = 45;
 export const BOOST_REGEN = 18;
+export const BOOST_MIN = 20;
+export const BOOST_COOLDOWN = 1.2;
 export const SHELL_BREAK_SPEED = 14;
 export const WALL_KNOCKBACK = 2;
 export const INVULN_TIME = 0.8;

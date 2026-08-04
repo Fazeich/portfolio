@@ -45,6 +45,7 @@ export interface SnakeState {
   speed: number;
   boost: number;
   boosting: boolean;
+  boostCooldown: number;
   invulnUntil: number;
 }
 

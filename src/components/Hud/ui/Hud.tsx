@@ -32,9 +32,14 @@ export const Hud = ({ world }: { world: WorldState }) => {
     let raf = 0;
 
     const tick = () => {
-      const { boost, boosting } = world.snake;
+      const { boost, boosting, boostCooldown } = world.snake;
       const percent = Math.round(boost);
-      const color = boosting ? theme.ui.boost : theme.ui.accent;
+      const onCooldown = boostCooldown > 0;
+      const color = boosting
+        ? theme.ui.boost
+        : onCooldown
+          ? theme.ui.textMuted
+          : theme.ui.accent;
 
       if (fillRef.current) {
         fillRef.current.style.width = `${percent}%`;
@@ -44,7 +49,9 @@ export const Hud = ({ world }: { world: WorldState }) => {
       }
 
       if (percentRef.current) {
-        percentRef.current.textContent = `${percent}%`;
+        percentRef.current.textContent = onCooldown
+          ? `КД ${boostCooldown.toFixed(1)}с`
+          : `${percent}%`;
       }
 
       raf = requestAnimationFrame(tick);
@@ -53,7 +60,7 @@ export const Hud = ({ world }: { world: WorldState }) => {
     raf = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(raf);
-  }, [active, world, theme.ui.boost, theme.ui.accent]);
+  }, [active, world, theme.ui.boost, theme.ui.accent, theme.ui.textMuted]);
 
   if (!active) {
     return null;

@@ -11,7 +11,7 @@
 - **Arena** (`src/components/Arena`): Renders the 3D arena — neon-grid floor (drei `Grid`) and 4 semi-transparent walls with glowing edges.
   - `lib/constants.ts`: Wall thickness.
 - **Snake** (`src/components/Snake`): Renders the snake as an `InstancedMesh` pool (head + chain), synced from world state each frame. Per-segment colors (head→tail gradient) and orientation.
-  - `lib/render.ts`: Per-frame matrix/color sync for the instanced chain.
+  - `lib/render.ts`: Per-frame matrix/color sync for the instanced chain. Unused instances (beyond the current segment count) are scaled to 0 every frame to keep them invisible.
 - **Food** (`src/components/Food`): Renders "protected" food — translucent shell sphere with a glowing core. Pool of `MAX_FOODS` slots synced from world state.
 - **Shards** (`src/components/Shards`): Renders shard pickups as a single `InstancedMesh` octahedron pool (1 draw call). Per-instance colors distinguish edible (amber, from theme) from inert just-broken (gray).
 - **CameraRig** (`src/components/CameraRig`): Follow camera behind the head with smoothing, FOV kick on boost, orbit mode on the menu screen.
@@ -19,7 +19,7 @@
 - **Effects** (`src/components/Effects`): Ambient dust points + a particle burst pool triggered on shell breaks.
   - `lib/particles.ts`: CPU particle simulation (positions/colors/lifetimes, circle sprite texture).
   - `lib/constants.ts`: Particle counts, speed, lifetime.
-- **Hud** (`src/components/Hud`): DOM overlay — score, best score, HP hearts, boost bar. The boost bar is ref-driven (updated in a `requestAnimationFrame` loop straight from the mutable world, no React re-renders) and exposed as `role="progressbar"`; hearts carry an `aria-label`.
+- **Hud** (`src/components/Hud`): DOM overlay — score, best score, HP hearts, boost bar. The boost bar is ref-driven (updated in a `requestAnimationFrame` loop straight from the mutable world, no React re-renders) and exposed as `role="progressbar"`; hearts carry an `aria-label`. The boost bar dims and shows a `КД X.Xс` countdown while the boost cooldown is active.
   - `lib/styles.ts`: styled-components for the HUD.
 - **Screens** (`src/components/Screens`): DOM overlays for `menu` / `paused` / `gameover` phases — title, rules, controls, play buttons, social links (react-social-icons). Handles Esc-pause and Space/Enter-start hotkeys. Dialogs use `role="dialog"` + `aria-modal` and a Tab focus trap (`useFocusTrap`).
   - `lib/styles.ts`: styled-components for screens/panels/buttons.
