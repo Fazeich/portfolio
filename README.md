@@ -4,8 +4,10 @@ A personal portfolio built as a **3D Snake game** with a unique mechanic: the sn
 
 The game itself is the portfolio — it demonstrates skills through the gameplay and the quality of the code, without an explicit "skills" section.
 
-- **Homepage** (`/`) — portfolio placeholder with a link to the game.
+- **Homepage** (`/`) — 3D top-down town: walk a character to the snake statue to enter the game.
 - **Snake game** (`/snake`) — the 3D arena.
+
+> The character model is **Rona - Metro Conflict: The Origin** by [ThuysKieu2207](https://sketchfab.com/superkhai.200), licensed under [CC-BY-NC-4.0](http://creativecommons.org/licenses/by-nc/4.0/) (non-commercial). Source: [Sketchfab](https://sketchfab.com/3d-models/rona-metro-conflict-the-origin-f121ddba29324e23af11ad17ccd971b3). See `src/pages/Portfolio/lib/assets/character/CREDITS.md`.
 
 ## Gameplay Mechanics
 
