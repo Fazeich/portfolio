@@ -24,6 +24,10 @@
 
 ## Page-Specific Libs
 
+- **Town shared physics/interaction** (`src/pages/Portfolio/lib`): Used by both `CharacterModel` (mage) and `CarModel` (car).
+  - `physics.ts`: Module-level `OBSTACLES` list (altar AABBs + lantern pole AABBs); `clampToRoom(pos)` (clamp to walkable bounds via `PLAYER_MARGIN`) and `resolveObstacles(pos, radius)` (circle-vs-box push-out, returns whether a hit occurred so the car can damp its speed).
+  - `interaction.ts`: `tryStartInteraction(state)` (find nearest altar within `INTERACTION_RADIUS` and arm the activation) and `stepInteraction(state, dt, onNavigate)` (advance `interactionTimer`, navigate when it reaches `ANIMATION_DURATION`, return whether an interaction is in progress so movement is skipped).
+
 - **Letter Rain world/lib** (`src/pages/Letters/lib`): Used only by the Letters page.
   - `constants.ts`: Layout/physics tuning — `MAX_LETTERS` (9), `MIN_LETTER_PX` (120 — minimum on-screen letter size in px), play-area bounds (`AREA_HALF_W`, `AREA_HEIGHT`; `AREA_HALF_D` = 0.9 ≈ 1.5 × letter depth — the field is one row deep), fast fall tuning (`GRAVITY` 90, `INITIAL_VY` -10, `MAX_FALL_SPEED` 60), free tilt dynamics (`MAX_TILT` 0.3 rad with limit bounce, `TILT_VELOCITY` 2, `TILT_AIR_DRAG`, `TILT_REST_DRAG`, `TILT_IMPACT_KICK`), camera FOV/margin, visual tokens (background/letter/floor/wall colors).
   - `types.ts`: `LetterEntity` (id, char, position/velocity vectors, tilt + tilt velocities, per-char base AABB half-extents, resting flag), `LettersWorld` (letters array, nextId, `pxPerWorld`, `letterScale`).

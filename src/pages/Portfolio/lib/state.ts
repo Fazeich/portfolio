@@ -1,5 +1,7 @@
 import { PLAYER_SPAWN } from "./constants";
 
+export type CharacterId = "mage" | "car";
+
 export interface TooltipState {
   visible: boolean;
   x: number;
@@ -21,6 +23,7 @@ export interface TownState {
   interacting: boolean;
   interactionTimer: number;
   interactionTarget: string;
+  hoveredAltarId: string | null;
   tooltip: TooltipState;
 }
 
@@ -37,7 +40,7 @@ export const createTownState = (): TownState => ({
   player: {
     x: PLAYER_SPAWN.x,
     z: PLAYER_SPAWN.z,
-    facing: 0,
+    facing: Math.PI,
     walkPhase: 0,
     targetWalkPhase: 0,
     moving: false,
@@ -45,5 +48,6 @@ export const createTownState = (): TownState => ({
   interacting: false,
   interactionTimer: 0,
   interactionTarget: "",
+  hoveredAltarId: null,
   tooltip: { ...NO_TOOLTIP },
 });

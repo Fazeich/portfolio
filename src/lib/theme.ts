@@ -30,11 +30,20 @@ export interface IUITheme {
   overlay: string;
 }
 
+export interface ITownTheme {
+  title: string;
+  hint: string;
+  key: string;
+  keyText: string;
+  fade: string;
+}
+
 export interface ITheme {
   arena: IArenaTheme;
   snake: ISnakeTheme;
   food: IFoodTheme;
   ui: IUITheme;
+  town: ITownTheme;
 }
 
 export const GAME_THEME: ITheme = {
@@ -65,5 +74,12 @@ export const GAME_THEME: ITheme = {
     panel: "rgba(10, 14, 23, 0.85)",
     panelBorder: "rgba(56, 189, 248, 0.35)",
     overlay: "rgba(4, 6, 12, 0.7)",
+  },
+  town: {
+    title: "#334155",
+    hint: "#475569",
+    key: "#facc15",
+    keyText: "#1e293b",
+    fade: "#ffffff",
   },
 };

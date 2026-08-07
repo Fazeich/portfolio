@@ -9,6 +9,7 @@ The theme is currently a **mock** and will be refined later. It is provided via 
   - `snake`: head/body/tail gradient colors + glow color.
   - `food`: shell, core, shard colors.
   - `ui`: text, muted text, accent, danger, boost, panel/panel-border, overlay colors (used by HUD and Screens).
+  - `town`: bright-hub DOM tokens — title/hint text colors, key-cap colors, white fade color (used by `HubHud` and the activation fade overlay).
 - **theme.d.ts** (`src/declarations/theme.d.ts`): TypeScript declaration extending `styled-components` `DefaultTheme` with the `ITheme` interface so `useTheme()` is typed.
 
 ## Styling Approach

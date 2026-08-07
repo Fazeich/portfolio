@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { SocialIcon } from "react-social-icons";
+import { useNavigate } from "react-router-dom";
 import { useUnit } from "effector-react";
 import { GamePhase } from "@/lib/types";
 import {
@@ -93,6 +94,12 @@ const useFocusTrap = (
 export const Screens = () => {
   const { phase, score, best } = useUnit($snake3d);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const goHome = () => {
+    toMenu();
+    navigate("/");
+  };
 
   useFocusTrap(overlayRef, phase);
 
@@ -176,6 +183,7 @@ export const Screens = () => {
               />
             ))}
           </SocialRow>
+          <SecondaryButton onClick={goHome}>Назад</SecondaryButton>
         </Panel>
       </Overlay>
     );
@@ -191,6 +199,7 @@ export const Screens = () => {
             <SecondaryButton onClick={() => startGame()}>
               Заново
             </SecondaryButton>
+            <SecondaryButton onClick={goHome}>Назад</SecondaryButton>
           </ButtonRow>
         </Panel>
       </Overlay>
@@ -208,6 +217,7 @@ export const Screens = () => {
           <ButtonRow>
             <Button onClick={() => startGame()}>Играть снова</Button>
             <SecondaryButton onClick={() => toMenu()}>В меню</SecondaryButton>
+            <SecondaryButton onClick={goHome}>Назад</SecondaryButton>
           </ButtonRow>
         </Panel>
       </Overlay>

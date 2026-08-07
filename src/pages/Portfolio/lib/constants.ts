@@ -7,12 +7,9 @@ export const ROOM_DEPTH = ROOM_ROWS;
 export const HALF_W = ROOM_WIDTH / 2;
 export const HALF_D = ROOM_DEPTH / 2;
 
-export const WALL_THICKNESS = 2;
-export const PLAYER_MARGIN = WALL_THICKNESS + 0.5;
+export const PLAYER_MARGIN = 0.7;
 
 export const GROUND_EXTENT = 2000;
-export const WALL_HEIGHT = 2.4;
-export const WALL_SIZE = 0.4;
 
 export const PLAYER_SPEED = 6;
 export const PLAYER_HEIGHT = 1.7;
@@ -42,6 +39,7 @@ export interface AltarDef {
   halfD: number;
   height: number;
   target: string;
+  accent: string;
 }
 
 export const ALTARS: AltarDef[] = [
@@ -55,6 +53,7 @@ export const ALTARS: AltarDef[] = [
     halfD: 0.9,
     height: 2.6,
     target: "/snake",
+    accent: "#22c55e",
   },
   {
     id: "letters",
@@ -66,8 +65,32 @@ export const ALTARS: AltarDef[] = [
     halfD: 0.9,
     height: 2.6,
     target: "/letters",
+    accent: "#f59e0b",
   },
 ];
 
 export const CAMERA_HEIGHT = 18;
 export const CAMERA_BACK = 15;
+export const CAMERA_FOV = 45;
+export const CAMERA_FOV_NEAR_ALTAR = 52;
+export const CAMERA_BLEND = 8;
+export const CAMERA_LOOK_BLEND = 10;
+export const CAMERA_ALTAR_FOCUS_RAISE = 2.2;
+export const INTERACTION_CAMERA_SPEED = 0.3;
+export const INTERACTION_CAMERA_BACK = 5.4;
+export const INTERACTION_CAMERA_LOOK_Y = 0.55;
+export const INTERACTION_CAMERA_HEIGHT_OFFSET = 0.9;
+
+export const SKY_COLOR = "#e8e4da";
+export const FOG_NEAR = 70;
+export const FOG_FAR = 380;
+
+export const SUN_POSITION = { x: 15, y: 30, z: 12 };
+
+export const LANTERN_POSITIONS = [
+  { x: -HALF_W + 3.4, z: -HALF_D + 3.4 },
+  { x: HALF_W - 3.4, z: -HALF_D + 3.4 },
+  { x: -HALF_W + 3.4, z: HALF_D - 3.4 },
+  { x: HALF_W - 3.4, z: HALF_D - 3.4 },
+];
+export const LANTERN_POLE_HALF = 0.2;

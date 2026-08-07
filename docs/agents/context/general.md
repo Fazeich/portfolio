@@ -7,13 +7,13 @@ This project is a personal portfolio built as a set of **3D mini-games**. The ga
 - **Framework**: React 18
 - **Build Tool**: Vite
 - **State Management**: Effector (discrete game events only)
-- **3D Rendering**: `three` + `@react-three/fiber` (Canvas, useFrame), `@react-three/drei` (Grid, Edges, Text3D, Billboard), `@react-three/postprocessing` (Bloom). All pages (town, snake, letters) are 3D.
+- **3D Rendering**: `three` + `@react-three/fiber` (Canvas, useFrame), `@react-three/drei` (Grid, Edges, Text3D, Billboard, SoftShadows), `@react-three/postprocessing` (Bloom, Vignette). All pages (town, snake, letters) are 3D.
 - **Styling**: `styled-components` for HUD/DOM overlays + a mock theme system (to be refined later)
 - **Routing**: `react-router-dom` (BrowserRouter, basename `/portfolio`)
 - **Icons**: `react-social-icons` (menu links, decorative icons)
 
 ## Routes
-- `/` — 3D top-down town mini-game. Walk a low-poly character to a 3D billboard sign, press E to enter a project. The altar system is data-driven via `ALTARS` in `src/pages/Portfolio/lib/constants.ts` (currently "Snake 3D" → `/snake` and "Letter Rain" → `/letters`).
+- `/` — 3D top-down "bright diorama" town. Drive/walk a switchable voxel character (mage or voxel car, via a HUD select) to a 3D billboard sign (highlighted on approach), press E to enter a project. The altar system is data-driven via `ALTARS` in `src/pages/Portfolio/lib/constants.ts` (currently "Snake 3D" → `/snake` and "Letter Rain" → `/letters`). Atmosphere: sky + fog, soft shadows, Bloom/Vignette postprocessing.
 - `/snake` — 3D Snake game.
 - `/letters` — Letter Rain: typed characters fall as 3D letters with simple physics.
 - GitHub Pages SPA fallback via `dist/404.html` copy of `index.html`

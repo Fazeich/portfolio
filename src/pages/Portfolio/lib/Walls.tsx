@@ -1,57 +1,93 @@
+import { useMemo } from "react";
 import * as THREE from "three";
-import {
-  HALF_D,
-  HALF_W,
-  ROOM_DEPTH,
-  ROOM_WIDTH,
-  WALL_HEIGHT,
-  WALL_SIZE,
-} from "./constants";
+import { HALF_D, HALF_W, ROOM_DEPTH, ROOM_WIDTH } from "./constants";
 
-const wallMaterial = new THREE.MeshPhysicalMaterial({
-  color: new THREE.Color("#e2d9cd"),
-  roughness: 0.35,
+const POST_HEIGHT = 1.15;
+const POST_SIZE = 0.16;
+const POST_SPACING = 4.4;
+const RAIL_SIZE = 0.09;
+const RAIL_Y = [1.0, 0.52];
+
+const fenceMaterial = new THREE.MeshStandardMaterial({
+  color: "#a9835c",
+  roughness: 0.85,
   metalness: 0,
-  clearcoat: 0.4,
-  clearcoatRoughness: 0.4,
 });
 
-export const Walls = () => (
-  <group>
-    <mesh
-      material={wallMaterial}
-      position={[0, WALL_HEIGHT / 2, -HALF_D]}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[ROOM_WIDTH, WALL_HEIGHT, WALL_SIZE]} />
-    </mesh>
+interface Post {
+  position: [number, number, number];
+}
 
-    <mesh
-      material={wallMaterial}
-      position={[0, WALL_HEIGHT / 2, HALF_D]}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[ROOM_WIDTH, WALL_HEIGHT, WALL_SIZE]} />
-    </mesh>
+const buildPosts = (): Post[] => {
+  const posts: Post[] = [];
 
-    <mesh
-      material={wallMaterial}
-      position={[-HALF_W, WALL_HEIGHT / 2, 0]}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[WALL_SIZE, WALL_HEIGHT, ROOM_DEPTH]} />
-    </mesh>
+  for (let x = -HALF_W + 2.2; x <= HALF_W - 2.2; x += POST_SPACING) {
+    posts.push({ position: [x, POST_HEIGHT / 2, -HALF_D] });
+    posts.push({ position: [x, POST_HEIGHT / 2, HALF_D] });
+  }
 
-    <mesh
-      material={wallMaterial}
-      position={[HALF_W, WALL_HEIGHT / 2, 0]}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[WALL_SIZE, WALL_HEIGHT, ROOM_DEPTH]} />
-    </mesh>
-  </group>
+  for (let z = -HALF_D + 2.2; z <= HALF_D - 2.2; z += POST_SPACING) {
+    posts.push({ position: [-HALF_W, POST_HEIGHT / 2, z] });
+    posts.push({ position: [HALF_W, POST_HEIGHT / 2, z] });
+  }
+
+  return posts;
+};
+
+const Rail = ({
+  args,
+  position,
+}: {
+  args: [number, number, number];
+  position: [number, number, number];
+}) => (
+  <mesh material={fenceMaterial} position={position} castShadow receiveShadow>
+    <boxGeometry args={args} />
+  </mesh>
 );
+
+export const Walls = () => {
+  const posts = useMemo(() => buildPosts(), []);
+
+  return (
+    <group>
+      {posts.map((post, i) => (
+        <mesh
+          key={i}
+          material={fenceMaterial}
+          position={post.position}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[POST_SIZE, POST_HEIGHT, POST_SIZE]} />
+        </mesh>
+      ))}
+
+      {RAIL_Y.map((y) => (
+        <group key={`n-${y}`}>
+          <Rail
+            args={[ROOM_WIDTH, RAIL_SIZE, RAIL_SIZE]}
+            position={[0, y, -HALF_D]}
+          />
+          <Rail
+            args={[ROOM_WIDTH, RAIL_SIZE, RAIL_SIZE]}
+            position={[0, y, HALF_D]}
+          />
+        </group>
+      ))}
+
+      {RAIL_Y.map((y) => (
+        <group key={`e-${y}`}>
+          <Rail
+            args={[RAIL_SIZE, RAIL_SIZE, ROOM_DEPTH]}
+            position={[-HALF_W, y, 0]}
+          />
+          <Rail
+            args={[RAIL_SIZE, RAIL_SIZE, ROOM_DEPTH]}
+            position={[HALF_W, y, 0]}
+          />
+        </group>
+      ))}
+    </group>
+  );
+};
