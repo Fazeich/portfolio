@@ -45,3 +45,8 @@ To maintain consistency, every component follows this structure:
 - **Physics** is hand-rolled (no physics engine): follow-the-leader chain, plane reflections, ram detection, shard physics; letters use AABB gravity/stacking physics.
 - **Effector** handles only discrete UI events: phase, score, HP, best score (localStorage); `letterTyped`/`clearLetters` feed the letters world.
 - **Game loop** runs inside the Canvas via `useFrame` (`src/pages/Snake/ui/GameLoop.tsx`; letters loop in `LettersScene`); input raycast for mouse lives in `PointerTracker.tsx`.
+- **Routing** uses `React.lazy` and a shared `Suspense` boundary in `src/main.tsx`, so each Three.js page is loaded only when its route is opened.
+- **Build splitting** keeps Three.js, Fiber, Drei, and postprocessing in separate vendor chunks via `configs/vite.config.ts`, avoiding one oversized application chunk.
+
+## Autoloop (self-improvement loop)
+The project is improved by an autonomous loop under `scripts/autoloop/` (see `utilities.md`). It uses the opencode CLI as the generator, runs `lint/typecheck/test/build` as hard gates, and judges visual progress with a vision model on fixed-seed screenshots captured by Playwright (system Chrome). The map art target for Phase 1 is defined in `docs/agents/context/art-direction.md`: a **voxel open world** (infinite procedural terrain, explicit biomes, fence removed, random pedestals with the existing mini-games) where every map element scores **>= 8/10** on the rubric. **Rapier** is planned to replace the hand-rolled town physics before the open world is built; the snake/letters hand-rolled physics stays as is for now.

@@ -1,5 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { readAutoloopSeed } from "@/lib/autoloop";
+import { seeded } from "@/lib/random";
 import { ALTARS, HALF_D, HALF_W } from "./constants";
 
 const COUNT = 900;
@@ -8,12 +10,6 @@ const CLEAR_RADIUS = 3.2;
 
 const gravelColors = ["#c9c2b8", "#b8b0a4", "#a89f92", "#bfb7ab"];
 
-const seeded = (n: number): number => {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-
-  return x - Math.floor(x);
-};
-
 interface Pebble {
   position: [number, number, number];
   rotation: [number, number, number];
@@ -21,14 +17,14 @@ interface Pebble {
   color: string;
 }
 
-const generatePebbles = (): Pebble[] => {
+const generatePebbles = (seedOffset: number): Pebble[] => {
   const pebbles: Pebble[] = [];
   let seed = 0;
 
   while (pebbles.length < COUNT && seed < COUNT * 50) {
-    const r1 = seeded(seed * 3 + 1);
-    const r2 = seeded(seed * 3 + 2);
-    const r3 = seeded(seed * 3 + 3);
+    const r1 = seeded(seed * 3 + 1, seedOffset);
+    const r2 = seeded(seed * 3 + 2, seedOffset);
+    const r3 = seeded(seed * 3 + 3, seedOffset);
     seed += 1;
 
     const minX = -HALF_W + INTERIOR_MARGIN;
@@ -71,7 +67,8 @@ const generatePebbles = (): Pebble[] => {
 export const Gravel = () => {
   const ref = useRef<THREE.InstancedMesh>(null);
 
-  const pebbles = useMemo(() => generatePebbles(), []);
+  const seed = readAutoloopSeed();
+  const pebbles = useMemo(() => generatePebbles(seed), [seed]);
 
   useLayoutEffect(() => {
     const mesh = ref.current;

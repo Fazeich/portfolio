@@ -11,6 +11,7 @@ import {
   TURN_SPEED,
   WALK_CYCLE_SPEED,
 } from "./constants";
+import { isAutoloopFrozen } from "@/lib/autoloop";
 import { TownState } from "./state";
 import { pollControls } from "./controls";
 import { clampToRoom, resolveObstacles } from "./physics";
@@ -107,6 +108,10 @@ export const CharacterModel = ({
   navigateRef.current = onNavigate;
 
   useFrame(({ clock }, delta) => {
+    if (isAutoloopFrozen()) {
+      return;
+    }
+
     const dt = Math.min(delta, 0.05);
     const player = state.player;
     const t = clock.getElapsedTime();

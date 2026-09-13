@@ -6,6 +6,7 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { InteractionTooltip } from "./InteractionTooltip";
 import { HubHud } from "./HubHud";
 import { TownScene } from "../lib/TownScene";
+import { AutoloopBridge } from "../lib/AutoloopBridge";
 import { CharacterId, createTownState, TownState } from "../lib/state";
 import { bindControls } from "../lib/controls";
 import {
@@ -112,6 +113,7 @@ export const PortfolioPage = () => {
         gl={{ antialias: true, powerPreference: "high-performance" }}
       >
         <TownScene state={state} character={character} onNavigate={handleNavigate} />
+        <AutoloopBridge state={state} />
 
         <EffectComposer>
           <Bloom

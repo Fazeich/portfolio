@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
+import { readAutoloopSeed } from "@/lib/autoloop";
+import { seeded } from "@/lib/random";
 import { HALF_D, HALF_W } from "./constants";
 
 const trunkMaterial = new THREE.MeshStandardMaterial({
@@ -14,12 +16,6 @@ const leafMaterial = new THREE.MeshStandardMaterial({
   metalness: 0,
 });
 
-const seeded = (n: number): number => {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-
-  return x - Math.floor(x);
-};
-
 interface Tree {
   position: [number, number, number];
   height: number;
@@ -27,13 +23,13 @@ interface Tree {
   lean: number;
 }
 
-const generateTrees = (count: number): Tree[] => {
+const generateTrees = (count: number, seed: number): Tree[] => {
   const trees: Tree[] = [];
 
   for (let i = 0; i < count; i += 1) {
-    const r1 = seeded(i * 13 + 1);
-    const r2 = seeded(i * 13 + 2);
-    const r3 = seeded(i * 13 + 3);
+    const r1 = seeded(i * 13 + 1, seed);
+    const r2 = seeded(i * 13 + 2, seed);
+    const r3 = seeded(i * 13 + 3, seed);
     const edge = i % 4;
     const offset = 2.5 + r1 * 6;
 
@@ -66,7 +62,8 @@ const generateTrees = (count: number): Tree[] => {
 };
 
 export const Trees = () => {
-  const trees = useMemo(() => generateTrees(10), []);
+  const seed = readAutoloopSeed();
+  const trees = useMemo(() => generateTrees(10, seed), [seed]);
 
   return (
     <group>

@@ -21,4 +21,17 @@ export default defineConfig({
       cwd: () => "/",
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "three-core": ["three"],
+          "three-fiber": ["@react-three/fiber"],
+          "three-drei": ["@react-three/drei"],
+          "three-postprocessing": ["@react-three/postprocessing"],
+          postprocessing: ["postprocessing"],
+        },
+      },
+    },
+  },
 });

@@ -63,7 +63,7 @@ const Divider = styled.span`
 `;
 
 export const HubHud = () => (
-  <Root>
+  <Root data-hud>
     <Title>
       <TitleText>Portfolio</TitleText>
       <Subtitle>3D mini-games</Subtitle>

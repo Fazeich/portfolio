@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import { isAutoloopFrozen } from "@/lib/autoloop";
 import { PLAYER_SPAWN } from "./constants";
 import { TownState } from "./state";
 import { pollControls } from "./controls";
@@ -129,6 +130,10 @@ export const CarModel = ({
   navigateRef.current = onNavigate;
 
   useFrame((_, delta) => {
+    if (isAutoloopFrozen()) {
+      return;
+    }
+
     const dt = Math.min(delta, 0.05);
     const player = state.player;
     const car = carRef.current;

@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
+import { readAutoloopSeed } from "@/lib/autoloop";
+import { seeded } from "@/lib/random";
 import { HALF_D, HALF_W } from "./constants";
 
 const stoneMaterial = new THREE.MeshStandardMaterial({
@@ -14,19 +16,13 @@ interface Stone {
   rotation: [number, number, number];
 }
 
-const seeded = (n: number): number => {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-
-  return x - Math.floor(x);
-};
-
-const generateStones = (count: number): Stone[] => {
+const generateStones = (count: number, seed: number): Stone[] => {
   const stones: Stone[] = [];
 
   for (let i = 0; i < count; i += 1) {
-    const r1 = seeded(i * 3 + 1);
-    const r2 = seeded(i * 3 + 2);
-    const r3 = seeded(i * 3 + 3);
+    const r1 = seeded(i * 3 + 1, seed);
+    const r2 = seeded(i * 3 + 2, seed);
+    const r3 = seeded(i * 3 + 3, seed);
 
     const edge = i % 4;
     const offset = 1.5 + r1 * 5.5;
@@ -61,7 +57,8 @@ const generateStones = (count: number): Stone[] => {
 };
 
 export const Stones = () => {
-  const stones = useMemo(() => generateStones(48), []);
+  const seed = readAutoloopSeed();
+  const stones = useMemo(() => generateStones(48, seed), [seed]);
 
   return (
     <group>

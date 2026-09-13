@@ -16,6 +16,7 @@ import {
   INTERACTION_RADIUS,
 } from "./constants";
 import { TownState } from "./state";
+import { isAutoloopFrozen } from "@/lib/autoloop";
 
 const desired = new THREE.Vector3();
 const lookDesired = new THREE.Vector3();
@@ -25,6 +26,10 @@ const currentLook = new THREE.Vector3();
 
 export const CameraRig = ({ state }: { state: TownState }) => {
   useFrame(({ camera, size }, delta) => {
+    if (isAutoloopFrozen()) {
+      return;
+    }
+
     const dt = Math.min(delta, 0.05);
     const p = state.player;
 

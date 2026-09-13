@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { isAutoloopFrozen } from "@/lib/autoloop";
 import { HALF_D, HALF_W, PLAYER_MARGIN } from "./constants";
 import { TownState } from "./state";
 
@@ -113,6 +114,10 @@ export const Crates = ({
   const prevPos = useRef({ x: state.player.x, z: state.player.z });
 
   useFrame((_, delta) => {
+    if (isAutoloopFrozen()) {
+      return;
+    }
+
     const dt = Math.min(delta, 0.05);
     const p = state.player;
 

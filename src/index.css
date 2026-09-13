@@ -10,3 +10,7 @@
 
   user-select: none;
 }
+
+.autoloop-hide-hud [data-hud] {
+  display: none !important;
+}

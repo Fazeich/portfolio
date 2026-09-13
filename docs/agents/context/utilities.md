@@ -9,7 +9,9 @@
 - **physics.ts** (`src/lib/physics.ts`): Hand-rolled physics — `stepWorld()` (movement, steering with `MAX_TURN_RATE`, wall reflection + HP damage, ram detection, shard integration/pickup, food spawning), `isGameOver()`, `segmentRadius()`. Returns a `StepResult` (score gained / damage taken). Allocation-free hot paths (module-scoped scratch objects, in-place mutation); shared `reflectAxis` helper for wall/floor reflections; shards are tagged with a `breakId` and break bonuses are tracked per-break via `BreakTracker` (handles overlapping breaks). Boost runs on a cooldown: it drains fully to 0 while active, ends when the meter hits 0 (no stutter), starts a `BOOST_COOLDOWN` on end, and regenerates only after the cooldown expires. `BOOST_MIN` only gates starting a *new* boost — an active boost drains all the way down.
 - **hooks.ts** (`src/lib/hooks.ts`): React hooks — `useInputRef()` (shared mutable input), `useKeyboardInput()` (WASD/arrows + Space boost).
 - **styles.ts** (`src/lib/styles.ts`): `GlobalStyle` and `PageWrapper` (full-screen layout, dark background).
-- **index.css** (`src/index.css`): Global reset + `Exo 2` font import, imported in `src/main.tsx`.
+- **index.css** (`src/index.css`): Global reset + `Exo 2` font import, imported in `src/main.tsx`. Also defines `.autoloop-hide-hud [data-hud] { display: none }` used by the autoloop harness.
+- **autoloop.ts** (`src/lib/autoloop.ts`): Test-mode runtime for the autoloop harness — `autoloopRuntime` (enabled/frozen/hudHidden/seed), `isAutoloopEnabled()` (`?autoloop=1`), `isAutoloopFrozen()`, `readAutoloopSeed()`, and the global `window.__autoloop` `AutoloopApi` type.
+- **random.ts** (`src/lib/random.ts`): Deterministic `seeded(index, seed)` helper used by procedural Portfolio decorations and the autoloop screenshots.
 - **theme.ts** (`src/lib/theme.ts`): Mock theme object `GAME_THEME` (arena/snake/food/ui tokens). To be refined later.
 - **assets/fonts** (`src/lib/assets/fonts/`): Shared `helvetiker_bold.typeface.json` (drei `Text3D` billboard text on altars; `FontLoader`/`TextGeometry` glyph cache for Letter Rain).
 
@@ -46,3 +48,19 @@
   - `src/lib/utils.test.ts` — vector/angle helpers.
   - `src/lib/physics.test.ts` — `stepWorld`, `segmentRadius`, `isGameOver`, wall damage, boost ram / shell break tracking, boost cooldown and 0% hard stop.
   - `src/stores/snake3d/snake3d.test.ts` — store reducers and best-score persistence (localStorage stub).
+
+## Autoloop Tooling (`scripts/autoloop`)
+
+Node ESM scripts that drive the self-improvement loop. Output lives in `.autoloop/` (gitignored). Not part of the app bundle.
+
+- **config.mjs**: `ROOT`, paths (`.autoloop/*`), `model`, `agentName`, perf `budgets`, `scoreThreshold` (8), `elements`, `gates`, `preview`, capture specs.
+- **ledger.mjs**: append/read `.autoloop/ledger.jsonl`; `lastScores(element)`.
+- **verifier.mjs**: `runGates(cwd)` runs `npm run lint/typecheck/test/build`; `allPassed`, `formatResults`.
+- **planner.mjs**: parses `.autoloop/tasks.md` checkboxes (`- [ ] ID [@element] :: text`) and filters tasks by element; `nextTask`, `markDone`, `addTasks`, `pendingCount`, `ensureTasks`.
+- **generator.mjs**: `generate({dir, prompt})` shells out to the opencode CLI (`run --format json --agent autoloop --auto`); `resolveOpencodeBin`, `parseLastText`.
+- **judge.mjs**: `judge({before, after, element, rubric})` sends both screenshots to the vision model and parses a JSON score.
+- **visual.mjs**: `captureAll({dir, outDir, seed})` boots `vite preview` and captures fixed frames with system Chrome (Playwright `channel: "chrome"`, no bundled browser).
+- **index.mjs**: orchestrator — worktree isolation (with a `node_modules` junction), iterate task -> generate -> gates -> capture -> judge -> commit/reset, stop when all `elements` reach `scoreThreshold`.
+- **prompts.mjs**: task-implementation and planner prompt templates.
+
+Related: `.opencode/agent/autoloop.md` (restricted implementer agent), `docs/agents/context/art-direction.md` (rubric + budget).

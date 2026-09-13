@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
+import { readAutoloopSeed } from "@/lib/autoloop";
+import { seeded } from "@/lib/random";
 
 const hillMaterial = new THREE.MeshStandardMaterial({
   color: "#b9b2a5",
@@ -7,25 +9,19 @@ const hillMaterial = new THREE.MeshStandardMaterial({
   metalness: 0,
 });
 
-const seeded = (n: number): number => {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-
-  return x - Math.floor(x);
-};
-
 interface Hill {
   position: [number, number, number];
   scale: [number, number, number];
   rotation: [number, number, number];
 }
 
-const generateHills = (count: number): Hill[] => {
+const generateHills = (count: number, seed: number): Hill[] => {
   const hills: Hill[] = [];
 
   for (let i = 0; i < count; i += 1) {
-    const r1 = seeded(i * 7 + 1);
-    const r2 = seeded(i * 7 + 2);
-    const r3 = seeded(i * 7 + 3);
+    const r1 = seeded(i * 7 + 1, seed);
+    const r2 = seeded(i * 7 + 2, seed);
+    const r3 = seeded(i * 7 + 3, seed);
     const angle = (i / count) * Math.PI * 2 + r1 * 0.5;
     const radius = 118 + r2 * 44;
 
@@ -44,7 +40,8 @@ const generateHills = (count: number): Hill[] => {
 };
 
 export const Hills = () => {
-  const hills = useMemo(() => generateHills(26), []);
+  const seed = readAutoloopSeed();
+  const hills = useMemo(() => generateHills(26, seed), [seed]);
 
   return (
     <group>
