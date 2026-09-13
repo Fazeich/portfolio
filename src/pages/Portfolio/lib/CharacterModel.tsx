@@ -14,8 +14,9 @@ import {
 import { isAutoloopFrozen } from "@/lib/autoloop";
 import { TownState } from "./state";
 import { pollControls } from "./controls";
-import { clampToRoom, resolveObstacles } from "./physics";
+import { resolveObstacles } from "./physics";
 import { stepInteraction, tryStartInteraction } from "./interaction";
+import { groundHeight } from "./world";
 
 const ROBE = "#4a5fd0";
 const ROBE_DARK = "#3b4bb5";
@@ -114,6 +115,7 @@ export const CharacterModel = ({
 
     const dt = Math.min(delta, 0.05);
     const player = state.player;
+    player.y = groundHeight(player.x, player.z);
     const t = clock.getElapsedTime();
 
     if (stepInteraction(state, dt, navigateRef.current)) {
@@ -131,7 +133,6 @@ export const CharacterModel = ({
       player.x += ctrl.moveDir.x * PLAYER_SPEED * dt;
       player.z += ctrl.moveDir.z * PLAYER_SPEED * dt;
 
-      clampToRoom(player);
       resolveObstacles(player, PLAYER_RADIUS);
 
       player.targetWalkPhase += WALK_CYCLE_SPEED * dt;
@@ -156,7 +157,11 @@ export const CharacterModel = ({
         ? Math.abs(Math.sin(player.walkPhase * Math.PI * 2)) * BOB_AMPLITUDE
         : 0;
 
-      bodyRef.current.position.set(player.x, 0, player.z);
+      bodyRef.current.position.set(
+        player.x,
+        groundHeight(player.x, player.z),
+        player.z,
+      );
       bodyRef.current.rotation.y = currentFacing.current;
 
       if (bobRef.current) {
@@ -218,7 +223,11 @@ export const CharacterModel = ({
   return (
     <group
       ref={bodyRef}
-      position={[PLAYER_SPAWN.x, 0, PLAYER_SPAWN.z]}
+      position={[
+        PLAYER_SPAWN.x,
+        groundHeight(PLAYER_SPAWN.x, PLAYER_SPAWN.z),
+        PLAYER_SPAWN.z,
+      ]}
     >
       <group ref={bobRef} scale={CHARACTER_SCALE}>
         <group ref={skirtRef}>

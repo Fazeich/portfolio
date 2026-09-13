@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { isAutoloopFrozen } from "@/lib/autoloop";
 import {
-  ALTARS,
   CAMERA_ALTAR_FOCUS_RAISE,
   CAMERA_BACK,
   CAMERA_BLEND,
@@ -16,7 +16,7 @@ import {
   INTERACTION_RADIUS,
 } from "./constants";
 import { TownState } from "./state";
-import { isAutoloopFrozen } from "@/lib/autoloop";
+import { groundHeight, world } from "./world";
 
 const desired = new THREE.Vector3();
 const lookDesired = new THREE.Vector3();
@@ -32,46 +32,56 @@ export const CameraRig = ({ state }: { state: TownState }) => {
 
     const dt = Math.min(delta, 0.05);
     const p = state.player;
+    const pedestals = world.pedestals;
 
     let nearest = -1;
     let nearestDist = INTERACTION_RADIUS;
 
-    for (let i = 0; i < ALTARS.length; i += 1) {
-      const altar = ALTARS[i];
-      const dx = p.x - altar.position.x;
-      const dz = p.z - altar.position.z;
-      const dist = Math.sqrt(dx * dx + dz * dz);
+    for (let i = 0; i < pedestals.length; i += 1) {
+      const pedestal = pedestals[i];
+      const dx = p.x - pedestal.position.x;
+      const dz = p.z - pedestal.position.z;
+      const distance = Math.sqrt(dx * dx + dz * dz);
 
-      if (dist < nearestDist) {
-        nearestDist = dist;
+      if (distance < nearestDist) {
+        nearestDist = distance;
         nearest = i;
       }
     }
 
     const inRange = !state.interacting && nearest >= 0;
+    const groundY = groundHeight(p.x, p.z);
 
     if (state.interacting) {
-      const altar =
-        ALTARS.find((a) => a.target === state.interactionTarget) ?? ALTARS[0];
+      const pedestal =
+        pedestals.find((item) => item.target === state.interactionTarget) ??
+        pedestals[0];
 
-      desired.set(
-        altar.position.x,
-        altar.height + INTERACTION_CAMERA_HEIGHT_OFFSET,
-        altar.position.z + INTERACTION_CAMERA_BACK,
-      );
-      lookDesired.set(
-        altar.position.x,
-        altar.height + INTERACTION_CAMERA_LOOK_Y,
-        altar.position.z,
-      );
+      if (pedestal) {
+        const baseY = groundHeight(
+          pedestal.position.x,
+          pedestal.position.z,
+        );
+
+        desired.set(
+          pedestal.position.x,
+          baseY + pedestal.height + INTERACTION_CAMERA_HEIGHT_OFFSET,
+          pedestal.position.z + INTERACTION_CAMERA_BACK,
+        );
+        lookDesired.set(
+          pedestal.position.x,
+          baseY + pedestal.height + INTERACTION_CAMERA_LOOK_Y,
+          pedestal.position.z,
+        );
+      }
     } else {
-      desired.set(p.x, CAMERA_HEIGHT, p.z + CAMERA_BACK);
+      desired.set(p.x, groundY + CAMERA_HEIGHT, p.z + CAMERA_BACK);
 
       if (inRange) {
         desired.y += CAMERA_ALTAR_FOCUS_RAISE;
       }
 
-      lookDesired.set(p.x, 1, p.z);
+      lookDesired.set(p.x, groundY + 1, p.z);
     }
 
     if (current.lengthSq() === 0) {
@@ -101,23 +111,28 @@ export const CameraRig = ({ state }: { state: TownState }) => {
     cam.updateProjectionMatrix();
 
     if (inRange) {
-      const altar = ALTARS[nearest];
+      const pedestal = pedestals[nearest];
+      const baseY = groundHeight(pedestal.position.x, pedestal.position.z);
 
       project
-        .set(altar.position.x, altar.height + 0.7, altar.position.z)
+        .set(
+          pedestal.position.x,
+          baseY + pedestal.height + 0.7,
+          pedestal.position.z,
+        )
         .project(camera);
 
       state.tooltip.visible = true;
       state.tooltip.x = (project.x * 0.5 + 0.5) * size.width;
       state.tooltip.y = (-project.y * 0.5 + 0.5) * size.height;
-      state.tooltip.label = altar.label;
-      state.tooltip.keyHint = altar.keyHint;
-      state.tooltip.target = altar.target;
-      state.hoveredAltarId = altar.id;
+      state.tooltip.label = pedestal.label;
+      state.tooltip.keyHint = pedestal.keyHint;
+      state.tooltip.target = pedestal.target;
+      state.hoveredPedestalId = pedestal.id;
     } else {
       state.tooltip.visible = false;
       state.tooltip.target = "";
-      state.hoveredAltarId = null;
+      state.hoveredPedestalId = null;
     }
   });
 

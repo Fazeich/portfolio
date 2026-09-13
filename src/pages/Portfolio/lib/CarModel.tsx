@@ -5,19 +5,21 @@ import { isAutoloopFrozen } from "@/lib/autoloop";
 import { PLAYER_SPAWN } from "./constants";
 import { TownState } from "./state";
 import { pollControls } from "./controls";
-import { clampToRoom, resolveObstacles } from "./physics";
+import { resolveObstacles } from "./physics";
 import { stepInteraction, tryStartInteraction } from "./interaction";
+import {
+  CAR_RADIUS,
+  CarBody,
+  createCarBody,
+  slopeRisk,
+  stepCar,
+  WHEEL_RADIUS,
+} from "./carPhysics";
+import { groundHeight, drivingTerrain as terrain, rampAt } from "./world";
 
-const CAR_MAX_SPEED = 15;
-const CAR_REVERSE_SPEED = 6;
-const CAR_ACCEL = 12;
-const CAR_BRAKE = 26;
-const CAR_ROLL = 5;
-const CAR_STEER_RATE = 4.4;
-const CAR_STEER_LIMIT = 0.5;
-export const CAR_RADIUS = 0.6;
-const WHEEL_RADIUS = 0.22;
-const TURN_SPEED_MIN = 3.5;
+const OVERTURN_RISK = 0.62;
+const OVERTURN_SPEED = 3.2;
+const OVERTURN_RESET = 2.2;
 
 const BODY = "#e05252";
 const BODY_DARK = "#c23d3d";
@@ -27,7 +29,12 @@ const LIGHT = "#fff3c4";
 const WHEEL = "#1f1f1f";
 const WHEEL_LIGHT = "#3a3a3a";
 
-const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
+const UP = new THREE.Vector3(0, 1, 0);
+const normal = new THREE.Vector3();
+const slopeQuat = new THREE.Quaternion();
+const yawQuat = new THREE.Quaternion();
+const flipQuat = new THREE.Quaternion();
+const flipAxis = new THREE.Vector3(0, 0, 1);
 
 const bodyMaterial = new THREE.MeshStandardMaterial({
   color: BODY,
@@ -69,12 +76,10 @@ const wheelLightMaterial = new THREE.MeshStandardMaterial({
   metalness: 0.3,
 });
 
-interface CarState {
-  speed: number;
-  steer: number;
-  wheelSpin: number;
-  roll: number;
-  pitch: number;
+interface CarFlip {
+  active: boolean;
+  angle: number;
+  timer: number;
 }
 
 const Wheel = ({
@@ -119,13 +124,16 @@ export const CarModel = ({
   const wheelFRRef = useRef<THREE.Group>(null);
   const wheelRLRef = useRef<THREE.Group>(null);
   const wheelRRRef = useRef<THREE.Group>(null);
-  const carRef = useRef<CarState>({
-    speed: 0,
-    steer: 0,
-    wheelSpin: 0,
-    roll: 0,
-    pitch: 0,
-  });
+  const carRef = useRef<CarBody>(
+    createCarBody(
+      PLAYER_SPAWN.x,
+      PLAYER_SPAWN.z,
+      Math.PI,
+      groundHeight(PLAYER_SPAWN.x, PLAYER_SPAWN.z),
+    ),
+  );
+  const groundOrientation = useRef(new THREE.Quaternion());
+  const flipRef = useRef<CarFlip>({ active: false, angle: 0, timer: 0 });
   const navigateRef = useRef(onNavigate);
   navigateRef.current = onNavigate;
 
@@ -136,7 +144,8 @@ export const CarModel = ({
 
     const dt = Math.min(delta, 0.05);
     const player = state.player;
-    const car = carRef.current;
+    const body = carRef.current;
+    const flip = flipRef.current;
 
     if (stepInteraction(state, dt, navigateRef.current)) {
       return;
@@ -144,88 +153,134 @@ export const CarModel = ({
 
     const ctrl = pollControls();
 
-    if (ctrl.interact && tryStartInteraction(state)) {
+    if (!flip.active && ctrl.interact && tryStartInteraction(state)) {
       return;
     }
 
-    const fwd = ctrl.moveDir.z < 0 ? 1 : 0;
-    const back = ctrl.moveDir.z > 0 ? 1 : 0;
+    body.heading = player.facing;
 
-    if (fwd) {
-      car.speed += CAR_ACCEL * dt;
-    } else if (back) {
-      if (car.speed > 0.5) {
-        car.speed -= CAR_BRAKE * dt;
-      } else {
-        car.speed -= CAR_ACCEL * 0.5 * dt;
-      }
+    // Let external tools (autoloop `setPlayer`) teleport the car.
+    if (Math.hypot(player.x - body.x, player.z - body.z) > 5) {
+      body.x = player.x;
+      body.z = player.z;
+      body.y = groundHeight(player.x, player.z);
+      body.vy = 0;
+      body.speed = 0;
+      body.lateral = 0;
+      body.airborne = false;
+      body.yawRate = 0;
+      body.roll = body.rollVel = body.pitch = body.pitchVel = 0;
+      terrain.normalAt(body.x, body.z, normal);
+      groundOrientation.current.setFromUnitVectors(UP, normal);
+    }
+
+    if (flip.active) {
+      body.speed *= 1 - Math.min(1, 3 * dt);
+      body.lateral = 0;
+      flip.angle = Math.min(Math.PI, flip.angle + OVERTURN_SPEED * dt);
+      flip.timer += dt;
     } else {
-      const drag = Math.min(Math.abs(car.speed), CAR_ROLL * dt);
-
-      car.speed -= Math.sign(car.speed) * drag;
+      stepCar(
+        body,
+        {
+          throttle: ctrl.moveDir.z < 0 ? 1 : 0,
+          brake: ctrl.moveDir.z > 0 ? 1 : 0,
+          steer: -ctrl.moveDir.x,
+        },
+        terrain,
+        dt,
+      );
     }
 
-    car.speed = Math.max(-CAR_REVERSE_SPEED, Math.min(CAR_MAX_SPEED, car.speed));
+    player.x = body.x;
+    player.z = body.z;
+    player.facing = body.heading;
 
-    const steerInput = ctrl.moveDir.x;
-    const dirSign = car.speed >= 0 ? 1 : -1;
-    const speedFactor = Math.min(1, Math.abs(car.speed) / TURN_SPEED_MIN);
-    const targetSteer = -steerInput * CAR_STEER_LIMIT;
+    const hit = resolveObstacles(player, CAR_RADIUS);
+    const beforeX = player.x;
+    const beforeZ = player.z;
 
-    car.steer += (targetSteer - car.steer) * Math.min(1, 10 * dt);
-    player.facing += car.steer * CAR_STEER_RATE * speedFactor * dirSign * dt;
-
-    const fx = Math.sin(player.facing);
-    const fz = Math.cos(player.facing);
-
-    player.x += fx * car.speed * dt;
-    player.z += fz * car.speed * dt;
-
-    let hit = resolveObstacles(player, CAR_RADIUS);
-    const prevX = player.x;
-    const prevZ = player.z;
-
-    clampToRoom(player);
-
-    if (player.x !== prevX || player.z !== prevZ) {
-      hit = true;
+    if (hit || player.x !== beforeX || player.z !== beforeZ) {
+      body.speed *= 0.25;
+      body.lateral *= 0.3;
     }
 
-    if (hit) {
-      car.speed *= 0.25;
+    body.x = player.x;
+    body.z = player.z;
+
+    terrain.normalAt(body.x, body.z, normal);
+
+    if (!flip.active && !body.airborne && !rampAt(body.x, body.z) && slopeRisk(normal, body.speed) > OVERTURN_RISK) {
+      flip.active = true;
+      flip.timer = 0;
     }
 
-    car.wheelSpin += (car.speed / WHEEL_RADIUS) * dt;
-    car.roll = lerp(car.roll, -car.steer * speedFactor * 0.35, Math.min(1, 8 * dt));
-    car.pitch = lerp(car.pitch, fwd ? 0.05 : back ? 0.08 : 0, Math.min(1, 6 * dt));
+    if (flip.active && flip.timer > OVERTURN_RESET && flip.angle > Math.PI * 0.9) {
+      const downhill = Math.hypot(normal.x, normal.z) || 1;
+
+      body.x += (normal.x / downhill) * 1.6;
+      body.z += (normal.z / downhill) * 1.6;
+      body.speed = 0;
+      body.lateral = 0;
+      body.vy = 0;
+      body.y = groundHeight(body.x, body.z);
+      body.airborne = false;
+      flip.active = false;
+      flip.angle = 0;
+      flip.timer = 0;
+
+      player.x = body.x;
+      player.z = body.z;
+      body.x = player.x;
+      body.z = player.z;
+    }
+
+    player.y = body.y;
 
     if (rootRef.current) {
-      rootRef.current.position.set(player.x, 0, player.z);
-      rootRef.current.rotation.y = player.facing;
+      yawQuat.setFromAxisAngle(UP, body.heading);
+      if (!body.airborne) {
+        slopeQuat.setFromUnitVectors(UP, normal);
+        groundOrientation.current.slerp(slopeQuat, 1 - Math.exp(-10 * dt));
+      }
+      flipQuat.setFromAxisAngle(flipAxis, flip.angle);
+
+      rootRef.current.position.set(body.x, body.y, body.z);
+      rootRef.current.quaternion
+        .copy(groundOrientation.current)
+        .multiply(yawQuat)
+        .multiply(flipQuat);
     }
 
     if (bodyRef.current) {
-      bodyRef.current.rotation.z = car.roll;
-      bodyRef.current.rotation.x = -car.pitch;
+      bodyRef.current.rotation.z = body.roll;
+      bodyRef.current.rotation.x = body.pitch;
     }
 
     if (steerLRef.current) {
-      steerLRef.current.rotation.y = car.steer;
+      steerLRef.current.rotation.y = body.steer;
     }
 
     if (steerRRef.current) {
-      steerRRef.current.rotation.y = car.steer;
+      steerRRef.current.rotation.y = body.steer;
     }
 
     for (const ref of [wheelFLRef, wheelFRRef, wheelRLRef, wheelRRRef]) {
       if (ref.current) {
-        ref.current.rotation.x = car.wheelSpin;
+        ref.current.rotation.x = body.wheelSpin;
       }
     }
   });
 
   return (
-    <group ref={rootRef} position={[PLAYER_SPAWN.x, 0, PLAYER_SPAWN.z]}>
+    <group
+      ref={rootRef}
+      position={[
+        PLAYER_SPAWN.x,
+        groundHeight(PLAYER_SPAWN.x, PLAYER_SPAWN.z),
+        PLAYER_SPAWN.z,
+      ]}
+    >
       <group ref={bodyRef}>
         <Wheel spinRef={wheelRLRef} position={[0.55, WHEEL_RADIUS, -0.66]} />
         <Wheel spinRef={wheelRRRef} position={[-0.55, WHEEL_RADIUS, -0.66]} />

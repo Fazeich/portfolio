@@ -13,6 +13,7 @@ export interface TooltipState {
 
 export interface TownState {
   player: {
+    y: number;
     x: number;
     z: number;
     facing: number;
@@ -23,7 +24,7 @@ export interface TownState {
   interacting: boolean;
   interactionTimer: number;
   interactionTarget: string;
-  hoveredAltarId: string | null;
+  hoveredPedestalId: string | null;
   tooltip: TooltipState;
 }
 
@@ -38,6 +39,7 @@ export const NO_TOOLTIP: TooltipState = {
 
 export const createTownState = (): TownState => ({
   player: {
+    y: 0,
     x: PLAYER_SPAWN.x,
     z: PLAYER_SPAWN.z,
     facing: Math.PI,
@@ -48,6 +50,6 @@ export const createTownState = (): TownState => ({
   interacting: false,
   interactionTimer: 0,
   interactionTarget: "",
-  hoveredAltarId: null,
+  hoveredPedestalId: null,
   tooltip: { ...NO_TOOLTIP },
 });

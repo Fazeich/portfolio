@@ -1,18 +1,20 @@
-import { ALTARS, ANIMATION_DURATION, INTERACTION_RADIUS } from "./constants";
+import { ANIMATION_DURATION, INTERACTION_RADIUS } from "./constants";
 import { TownState } from "./state";
+import { world } from "./world";
 
 export const tryStartInteraction = (state: TownState): boolean => {
+  const pedestals = world.pedestals;
   let nearest = -1;
   let nearestDist = INTERACTION_RADIUS;
 
-  for (let i = 0; i < ALTARS.length; i += 1) {
-    const altar = ALTARS[i];
-    const ax = state.player.x - altar.position.x;
-    const az = state.player.z - altar.position.z;
-    const dist = Math.sqrt(ax * ax + az * az);
+  for (let i = 0; i < pedestals.length; i += 1) {
+    const pedestal = pedestals[i];
+    const dx = state.player.x - pedestal.position.x;
+    const dz = state.player.z - pedestal.position.z;
+    const distance = Math.sqrt(dx * dx + dz * dz);
 
-    if (dist < nearestDist) {
-      nearestDist = dist;
+    if (distance < nearestDist) {
+      nearestDist = distance;
       nearest = i;
     }
   }
@@ -23,7 +25,7 @@ export const tryStartInteraction = (state: TownState): boolean => {
 
   state.interacting = true;
   state.interactionTimer = 0;
-  state.interactionTarget = ALTARS[nearest].target;
+  state.interactionTarget = pedestals[nearest].target;
 
   return true;
 };

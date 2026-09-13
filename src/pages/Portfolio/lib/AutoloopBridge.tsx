@@ -14,8 +14,16 @@ export const AutoloopBridge = ({ state }: { state: TownState }) => {
   const frameCount = useRef(0);
   const elapsed = useRef(0);
   const fps = useRef(0);
+  const drawCalls = useRef(0);
+  const triangles = useRef(0);
 
   useFrame((_, delta) => {
+    const info = gl.info;
+
+    drawCalls.current = info.render.calls;
+    triangles.current = info.render.triangles;
+    info.reset();
+
     frameCount.current += 1;
     elapsed.current += delta;
 
@@ -33,6 +41,8 @@ export const AutoloopBridge = ({ state }: { state: TownState }) => {
 
     autoloopRuntime.enabled = true;
     setAutoloopSeed(readAutoloopSeed());
+    gl.info.autoReset = false;
+    gl.info.reset();
 
     window.__autoloop = {
       freeze: (frozen) => {
@@ -63,14 +73,15 @@ export const AutoloopBridge = ({ state }: { state: TownState }) => {
       },
       stats: (): AutoloopStats => ({
         fps: fps.current,
-        drawCalls: gl.info.render.calls,
-        triangles: gl.info.render.triangles,
+        drawCalls: drawCalls.current,
+        triangles: triangles.current,
       }),
     };
 
     return () => {
       autoloopRuntime.enabled = false;
       autoloopRuntime.frozen = false;
+      gl.info.autoReset = true;
       document.documentElement.classList.remove("autoloop-hide-hud");
       delete window.__autoloop;
     };

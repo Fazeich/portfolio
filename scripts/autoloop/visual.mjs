@@ -32,17 +32,23 @@ const waitForServer = async (url, timeoutMs = 60_000) => {
 };
 
 export const startPreview = (dir) => {
+  const command = process.platform === "win32" ? "cmd.exe" : viteBin;
+  const commandArgs =
+    process.platform === "win32"
+      ? ["/d", "/c", "call", viteBin, "preview", "--config", "configs/vite.config.ts", "--port", String(preview.port), "--strictPort"]
+      : [
+          "preview",
+          "--config",
+          "configs/vite.config.ts",
+          "--port",
+          String(preview.port),
+          "--strictPort",
+        ];
+
   const child = spawn(
-    viteBin,
-    [
-      "preview",
-      "--config",
-      "configs/vite.config.ts",
-      "--port",
-      String(preview.port),
-      "--strictPort",
-    ],
-    { cwd: dir, stdio: "ignore", shell: true },
+    command,
+    commandArgs,
+    { cwd: dir, stdio: "ignore", shell: false },
   );
 
   return child;

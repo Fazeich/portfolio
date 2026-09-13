@@ -12,8 +12,10 @@ import { bindControls } from "../lib/controls";
 import {
   ANIMATION_DURATION,
   CAMERA_BACK,
+  CAMERA_FAR,
   CAMERA_FOV,
   CAMERA_HEIGHT,
+  SKY_COLOR,
 } from "../lib/constants";
 
 const WhiteFadeOverlay = ({ state }: { state: TownState }) => {
@@ -99,7 +101,7 @@ export const PortfolioPage = () => {
         height: "100vh",
         overflow: "hidden",
         position: "relative",
-        background: "#e8e4da",
+        background: SKY_COLOR,
       }}
     >
       <Canvas
@@ -107,7 +109,7 @@ export const PortfolioPage = () => {
         camera={{
           fov: CAMERA_FOV,
           near: 0.1,
-          far: 600,
+          far: CAMERA_FAR,
           position: [0, CAMERA_HEIGHT, CAMERA_BACK],
         }}
         gl={{ antialias: true, powerPreference: "high-performance" }}

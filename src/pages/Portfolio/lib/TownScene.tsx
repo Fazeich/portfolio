@@ -1,25 +1,22 @@
 import { SoftShadows } from "@react-three/drei";
 import { CharacterId, TownState } from "./state";
-import { Ground } from "./Ground";
-import { Walls } from "./Walls";
-import { Stones } from "./Stones";
-import { Gravel } from "./Gravel";
 import {
-  ALTARS,
   FOG_FAR,
   FOG_NEAR,
   PLAYER_RADIUS,
   SKY_COLOR,
   SUN_POSITION,
 } from "./constants";
-import { AltarSign } from "./AltarSign";
 import { CharacterModel } from "./CharacterModel";
-import { CarModel, CAR_RADIUS } from "./CarModel";
+import { CarModel } from "./CarModel";
+import { CAR_RADIUS } from "./carPhysics";
 import { Crates } from "./Crates";
 import { CameraRig } from "./CameraRig";
-import { Hills } from "./Hills";
-import { Trees } from "./Trees";
-import { Lanterns } from "./Lanterns";
+import { Terrain } from "./Terrain";
+import { Props } from "./Props";
+import { Pedestals } from "./Pedestals";
+import { Ramps } from "./Ramps";
+import { WorldStreamer } from "./WorldStreamer";
 
 export const TownScene = ({
   state,
@@ -34,41 +31,34 @@ export const TownScene = ({
     <color attach="background" args={[SKY_COLOR]} />
     <fog attach="fog" args={[SKY_COLOR, FOG_NEAR, FOG_FAR]} />
 
-    <hemisphereLight args={["#fff4e0", "#b8ad9a", 0.6]} />
+    <hemisphereLight args={["#fff4e0", "#b8ad9a", 0.7]} />
     <directionalLight
       position={[SUN_POSITION.x, SUN_POSITION.y, SUN_POSITION.z]}
-      intensity={1.5}
+      intensity={1.6}
       color="#fff1dd"
       castShadow
       shadow-mapSize={[2048, 2048]}
-      shadow-camera-left={-38}
-      shadow-camera-right={38}
-      shadow-camera-top={28}
-      shadow-camera-bottom={-28}
+      shadow-camera-left={-50}
+      shadow-camera-right={50}
+      shadow-camera-top={40}
+      shadow-camera-bottom={-40}
       shadow-camera-near={1}
-      shadow-camera-far={80}
+      shadow-camera-far={130}
       shadow-bias={-0.0004}
     />
-    <directionalLight position={[-12, 14, -16]} intensity={0.35} color="#bfd9f2" />
+    <directionalLight position={[-20, 22, -24]} intensity={0.35} color="#bfd9f2" />
 
-    <SoftShadows size={14} samples={10} focus={0.8} />
+    <SoftShadows size={16} samples={10} focus={0.8} />
 
-    <Ground />
-    <Walls />
-    <Hills />
-    <Stones />
-    <Trees />
-    <Gravel />
-    <Lanterns />
-    <Crates state={state} radius={character === "car" ? CAR_RADIUS : PLAYER_RADIUS} />
-
-    {ALTARS.map((altar) => (
-      <AltarSign
-        key={altar.id}
-        altar={altar}
-        active={state.hoveredAltarId === altar.id}
-      />
-    ))}
+    <WorldStreamer state={state} />
+    <Terrain />
+    <Props />
+    <Ramps />
+    <Pedestals state={state} />
+    <Crates
+      state={state}
+      radius={character === "car" ? CAR_RADIUS : PLAYER_RADIUS}
+    />
 
     {character === "mage" ? (
       <CharacterModel state={state} onNavigate={onNavigate} />

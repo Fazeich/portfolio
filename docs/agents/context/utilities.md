@@ -11,9 +11,10 @@
 - **styles.ts** (`src/lib/styles.ts`): `GlobalStyle` and `PageWrapper` (full-screen layout, dark background).
 - **index.css** (`src/index.css`): Global reset + `Exo 2` font import, imported in `src/main.tsx`. Also defines `.autoloop-hide-hud [data-hud] { display: none }` used by the autoloop harness.
 - **autoloop.ts** (`src/lib/autoloop.ts`): Test-mode runtime for the autoloop harness — `autoloopRuntime` (enabled/frozen/hudHidden/seed), `isAutoloopEnabled()` (`?autoloop=1`), `isAutoloopFrozen()`, `readAutoloopSeed()`, and the global `window.__autoloop` `AutoloopApi` type.
-- **random.ts** (`src/lib/random.ts`): Deterministic `seeded(index, seed)` helper used by procedural Portfolio decorations and the autoloop screenshots.
+- **random.ts** (`src/lib/random.ts`): Deterministic helpers for procedural generation — `seeded(index, seed)`, `hash2(x, y, seed)` (value-noise lattice hash), `createRng(seed)` (mulberry32) and `chance(rng, probability)`. Seeded by `?seed=` so autoloop screenshots are reproducible.
+- **voxel.ts** (`src/lib/voxel.ts`): Voxel geometry helpers — `VoxelPart`, `mergeVoxelParts(parts)` (bakes per-part colors into one vertex-colored `BufferGeometry`), `box(w,h,d)`, and `voxelMaterial()` (shared `vertexColors` + `flatShading` material). Used by the Portfolio `Props` and `Pedestals` components.
 - **theme.ts** (`src/lib/theme.ts`): Mock theme object `GAME_THEME` (arena/snake/food/ui tokens). To be refined later.
-- **assets/fonts** (`src/lib/assets/fonts/`): Shared `helvetiker_bold.typeface.json` (drei `Text3D` billboard text on altars; `FontLoader`/`TextGeometry` glyph cache for Letter Rain).
+- **assets/fonts** (`src/lib/assets/fonts/`): Shared `helvetiker_bold.typeface.json` (drei `Text3D` billboard text on pedestals; `FontLoader`/`TextGeometry` glyph cache for Letter Rain).
 
 ## State Management (Stores) (`src/stores`)
 
@@ -26,9 +27,20 @@
 
 ## Page-Specific Libs
 
+- **Portfolio world generation** (`src/pages/Portfolio/lib/world`): Deterministic procedural open world, seeded from `?seed=` or `TERRAIN_SEED`.
+  - `noise.ts`: `valueNoise`, `fbm`, `smoothstep` — dependency-free height/biome noise.
+  - `biomes.ts`: `BiomeId` + `BIOMES` (meadow / forest / rocky / mountain) with bright cartoon palettes and per-chunk spawn densities.
+  - `terrain.ts`: `createTerrain(seed)` → `heightAt` (fbm hills + massif mountains, quantized to 0.25 for voxel steps, flat starting pad near spawn), `biomeAt`, `normalAt`.
+  - `generate.ts` (`src/pages/Portfolio/lib/world/generate.ts`): Seeded biome-weighted vegetation with spacing between solid props, chunk-edge margins and spawn/pedestal clearings. A separate RNG generates 3�5-crate supply piles on reasonably flat areas in 48% of chunks, plus the nine-crate starting stack. Crates are dynamic and excluded from static colliders.
+  - `pedestals.ts` (`src/pages/Portfolio/lib/world/pedestals.ts`): Portal focus height is 3.9 to match the redesigned plaque. `createStartPedestals()` guarantees Snake 3D and Letter Rain in the initial area; `createPedestalForChunk(seed, cx, cz)` applies `PEDESTAL_CHANCE` (1%) independently to every streamed chunk; `createPedestals(seed)` is the initial-window helper.
+  - `index.ts`: Streaming world manager. Keeps a deterministic `chunkCache`, maintains an active 8×6 window around the player's current chunk, rebuilds active props/pedestals/colliders on window shifts, and exposes `updateWorldStreaming`, `subscribeWorld`, `getWorldRevision`, `world`, `terrain`, and `groundHeight`.
+  - `types.ts` (`src/pages/Portfolio/lib/world/types.ts`): `Prop` (including dynamic crate spawn definitions), `Chunk`, `Collider`, `PedestalDef`, `World`.
+  - `index.ts`: builds the singleton `world` (seed, terrain, chunks, props, pedestals, colliders) and exports `groundHeight(x, z)` and `terrain`.
+- **Car physics** (`src/pages/Portfolio/lib/carPhysics.ts`): Mutable heightfield simulation with bounded 120 Hz substeps, slope forces, quicker acceleration and steering with a gravity/load traction cap, speed-tapered target yaw with fast release/countersteering, and lighter damped chassis lean. Flight retains angular inertia. Unilateral spring-damper support uses terrain-relative vertical velocity, finite suspension travel and a damped bottom-stop rebound. Climbs build vertical momentum; crests release into ballistic flight without ground attraction. Isotropic air drag and airborne yaw preserve world-space horizontal direction and chassis angular inertia, with damped pitch/roll springs acting only under ground support. `CarBody.y` is the suspension equilibrium reference and may compress by `SUSPENSION_TRAVEL`.
+- **Car physics tests** (`src/pages/Portfolio/lib/carPhysics.test.ts`): Driving, slopes, turning inertia, ramp takeoff and settling, ledge gravity, airborne controls/momentum, hard landing rebound and matching 30/60/120 fps trajectories.
 - **Town shared physics/interaction** (`src/pages/Portfolio/lib`): Used by both `CharacterModel` (mage) and `CarModel` (car).
-  - `physics.ts`: Module-level `OBSTACLES` list (altar AABBs + lantern pole AABBs); `clampToRoom(pos)` (clamp to walkable bounds via `PLAYER_MARGIN`) and `resolveObstacles(pos, radius)` (circle-vs-box push-out, returns whether a hit occurred so the car can damp its speed).
-  - `interaction.ts`: `tryStartInteraction(state)` (find nearest altar within `INTERACTION_RADIUS` and arm the activation) and `stepInteraction(state, dt, onNavigate)` (advance `interactionTimer`, navigate when it reaches `ANIMATION_DURATION`, return whether an interaction is in progress so movement is skipped).
+  - `physics.ts`: `resolveObstacles(pos, radius)` (circle-vs-cylinder push-out over the currently active `world.colliders`, returns whether a hit occurred so the car can damp its speed). Player movement has no artificial world-boundary clamp; streaming moves the active window as the player travels.
+  - `interaction.ts`: `tryStartInteraction(state)` (find nearest pedestal within `INTERACTION_RADIUS` and arm the activation) and `stepInteraction(state, dt, onNavigate)` (advance `interactionTimer`, navigate when it reaches `ANIMATION_DURATION`, return whether an interaction is in progress so movement is skipped).
 
 - **Letter Rain world/lib** (`src/pages/Letters/lib`): Used only by the Letters page.
   - `constants.ts`: Layout/physics tuning — `MAX_LETTERS` (9), `MIN_LETTER_PX` (120 — minimum on-screen letter size in px), play-area bounds (`AREA_HALF_W`, `AREA_HEIGHT`; `AREA_HALF_D` = 0.9 ≈ 1.5 × letter depth — the field is one row deep), fast fall tuning (`GRAVITY` 90, `INITIAL_VY` -10, `MAX_FALL_SPEED` 60), free tilt dynamics (`MAX_TILT` 0.3 rad with limit bounce, `TILT_VELOCITY` 2, `TILT_AIR_DRAG`, `TILT_REST_DRAG`, `TILT_IMPACT_KICK`), camera FOV/margin, visual tokens (background/letter/floor/wall colors).
@@ -40,7 +52,7 @@
 
 ## Entry Point
 
-- **main.tsx** (`src/main.tsx`): Bootstraps the app — `ThemeProvider` with `GAME_THEME`, `GlobalStyle`, `<SnakePage />`. No router.
+- **main.tsx** (`src/main.tsx`): Bootstraps the app — `ThemeProvider` with `GAME_THEME`, `GlobalStyle`, `BrowserRouter` (`basename="/portfolio"`) and route-level `React.lazy` code-split pages behind a `Suspense` boundary.
 
 ## Tests
 
@@ -64,3 +76,15 @@ Node ESM scripts that drive the self-improvement loop. Output lives in `.autoloo
 - **prompts.mjs**: task-implementation and planner prompt templates.
 
 Related: `.opencode/agent/autoloop.md` (restricted implementer agent), `docs/agents/context/art-direction.md` (rubric + budget).
+
+- **Terrain geometry cache** (`src/pages/Portfolio/lib/world/geometry.ts`): Builds one colored heightfield geometry per immutable chunk, reuses it across window shifts and explicitly disposes it on cache eviction.
+
+- **Crate geometry** (`src/pages/Portfolio/lib/crateGeometry.ts`): Shared merged wooden crate with inset planks, frame, diagonal braces, grooves and iron nails; one material and one instanced draw for all streamed boxes.
+
+- **World regression tests** (`src/pages/Portfolio/lib/world/world.test.ts`): Deterministic biomes and crate piles, solid-prop spacing, one-chunk-per-update budget, overlapping geometry identity and bounded cache over long travel.
+
+- **Crate physics** (`src/pages/Portfolio/lib/cratePhysics.ts`): Pure 120 Hz bounded local box simulation. Swept player motion, height-aware approach-only impulses, equal-mass horizontal impact transfer, gravity, damped bounce/friction, three-axis tumble and face settling. Horizontal box contacts use fixed cube bounds; vertical contacts account for rotated cube extent to avoid sinking while tumbling.
+
+- **Ramps** (`src/pages/Portfolio/lib/world/ramps.ts`): Seeded rare curved ramps on gentle terrain, three heights (0.8/1.6/2.4), cardinal headings, pedestal clearance and open approach/landing lanes. Analytic surface helpers and testable `createDrivingSurface` match the render profile. `world/index.ts` exposes active ramps and `drivingTerrain`; `world/types.ts` stores ramp definitions per chunk and world. `world/generate.ts` reserves lanes across adjacent chunks.
+
+- **Handling/impact/ramp tests** (`src/pages/Portfolio/lib/carPhysics.test.ts`, `src/pages/Portfolio/lib/cratePhysics.test.ts`, `src/pages/Portfolio/lib/world/ramps.test.ts`): Countersteering/release response, approach-only crate impulse, airborne clearance, momentum transfer, support removal, settling, seeded ramp sizes and actual car takeoff/landing on all three profiles.
