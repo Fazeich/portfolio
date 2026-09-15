@@ -5,6 +5,7 @@ export interface ControlState {
 
 const held = new Set<string>();
 let interactJustPressed = false;
+export const resetControls = () => { held.clear(); interactJustPressed = false; };
 
 const movementCodes = new Set([
   "KeyW",
@@ -18,13 +19,15 @@ const movementCodes = new Set([
 ]);
 
 const keyHandler = (down: boolean) => (e: KeyboardEvent) => {
+  if (down && e.target instanceof HTMLElement && (e.target.matches("input, textarea, select") || e.target.isContentEditable)) return;
   const code = e.code;
 
-  if (code === "KeyE" && down) {
+  if (code === "KeyE" && down && !e.repeat) {
     interactJustPressed = true;
   }
 
   if (movementCodes.has(code)) {
+    e.preventDefault();
     if (down) {
       held.add(code);
     } else {
@@ -34,15 +37,20 @@ const keyHandler = (down: boolean) => (e: KeyboardEvent) => {
 };
 
 export const bindControls = (): (() => void) => {
+  const reset = resetControls;
+  reset();
   const onDown = keyHandler(true);
   const onUp = keyHandler(false);
 
   window.addEventListener("keydown", onDown);
   window.addEventListener("keyup", onUp);
+  window.addEventListener("blur", reset);
 
   return () => {
     window.removeEventListener("keydown", onDown);
     window.removeEventListener("keyup", onUp);
+    window.removeEventListener("blur", reset);
+    reset();
   };
 };
 

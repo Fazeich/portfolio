@@ -1,5 +1,9 @@
 # General Context
 
+## Playable expedition
+
+The hub now hosts **Хранители маяков**, a short non-linear open-world restoration campaign: explore, collect energy, restore five beacons in any order and return to camp. Uses shared rules in `src/lib/expedition.ts`, Effector/localStorage in `src/stores/expedition/expedition.ts`, world interaction in `src/pages/Portfolio/lib/ExpeditionWorld.tsx` and atlas/journal in `src/pages/Portfolio/ui/HubHud.tsx`. The world remains available after completion. Design and explicitly unimplemented roadmap: `docs/agents/context/game-design.md`.
+
 ## Project Overview
 This project is a personal portfolio built as a set of **3D mini-games**. The games are the portfolio — they showcase skills through the quality of the gameplay and the codebase, without an explicit "skills" section. Built with React, Vite, Three.js (react-three-fiber), and Effector for state management.
 
@@ -13,7 +17,7 @@ This project is a personal portfolio built as a set of **3D mini-games**. The ga
 - **Icons**: `react-social-icons` (menu links, decorative icons)
 
 ## Routes
-- `/` — 3D top-down "bright diorama" town. Drive/walk a switchable voxel character (mage or voxel car, via a HUD select) to a 3D billboard sign (highlighted on approach), press E to enter a project. The altar system is data-driven via `ALTARS` in `src/pages/Portfolio/lib/constants.ts` (currently "Snake 3D" → `/snake` and "Letter Rain" → `/letters`). Atmosphere: sky + fog, soft shadows, Bloom/Vignette postprocessing.
+- `/` — 3D top-down "bright diorama" town. Drive the voxel car to a 3D billboard sign (highlighted on approach), press E to enter a project. The altar system is data-driven via `ALTARS` in `src/pages/Portfolio/lib/constants.ts` (currently "Snake 3D" → `/snake` and "Letter Rain" → `/letters`). Atmosphere: sky + fog, soft shadows, Bloom/Vignette postprocessing.
 - `/snake` — 3D Snake game.
 - `/letters` — Letter Rain: typed characters fall as 3D letters with simple physics.
 - GitHub Pages SPA fallback via `dist/404.html` copy of `index.html`

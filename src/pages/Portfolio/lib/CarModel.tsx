@@ -134,11 +134,12 @@ export const CarModel = ({
   );
   const groundOrientation = useRef(new THREE.Quaternion());
   const flipRef = useRef<CarFlip>({ active: false, angle: 0, timer: 0 });
+  const teleportRevision = useRef(state.teleportRevision);
   const navigateRef = useRef(onNavigate);
   navigateRef.current = onNavigate;
 
   useFrame((_, delta) => {
-    if (isAutoloopFrozen()) {
+    if (isAutoloopFrozen() || state.paused) {
       return;
     }
 
@@ -160,7 +161,9 @@ export const CarModel = ({
     body.heading = player.facing;
 
     // Let external tools (autoloop `setPlayer`) teleport the car.
-    if (Math.hypot(player.x - body.x, player.z - body.z) > 5) {
+    if (teleportRevision.current !== state.teleportRevision || Math.hypot(player.x - body.x, player.z - body.z) > 5) {
+      teleportRevision.current = state.teleportRevision;
+      flip.active = false; flip.angle = 0; flip.timer = 0;
       body.x = player.x;
       body.z = player.z;
       body.y = groundHeight(player.x, player.z);

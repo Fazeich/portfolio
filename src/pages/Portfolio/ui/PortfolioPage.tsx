@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "styled-components";
 import { Canvas } from "@react-three/fiber";
@@ -7,7 +7,7 @@ import { InteractionTooltip } from "./InteractionTooltip";
 import { HubHud } from "./HubHud";
 import { TownScene } from "../lib/TownScene";
 import { AutoloopBridge } from "../lib/AutoloopBridge";
-import { CharacterId, createTownState, TownState } from "../lib/state";
+import { createTownState, TownState } from "../lib/state";
 import { bindControls } from "../lib/controls";
 import {
   ANIMATION_DURATION,
@@ -65,7 +65,6 @@ const WhiteFadeOverlay = ({ state }: { state: TownState }) => {
 export const PortfolioPage = () => {
   const navigate = useNavigate();
   const state = useMemo(() => createTownState(), []);
-  const [character, setCharacter] = useState<CharacterId>("car");
 
   useEffect(() => {
     const unbind = bindControls();
@@ -73,19 +72,7 @@ export const PortfolioPage = () => {
     return unbind;
   }, []);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Digit1") {
-        setCharacter((current) => (current === "mage" ? "car" : "mage"));
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  const handleNavigate = useCallback(
+const handleNavigate = useCallback(
     (path: string) => {
       navigate(path);
     },
@@ -114,7 +101,7 @@ export const PortfolioPage = () => {
         }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
       >
-        <TownScene state={state} character={character} onNavigate={handleNavigate} />
+        <TownScene state={state} onNavigate={handleNavigate} />
         <AutoloopBridge state={state} />
 
         <EffectComposer>
@@ -128,7 +115,7 @@ export const PortfolioPage = () => {
         </EffectComposer>
       </Canvas>
 
-      <HubHud />
+      <HubHud state={state} />
       <InteractionTooltip getState={getTooltip} />
       <WhiteFadeOverlay state={state} />
     </div>

@@ -1,5 +1,6 @@
 import { createRampForChunk, inRampLane, Ramp } from "./ramps";
 import { createRng } from "@/lib/random";
+import { expeditionClearing } from "@/lib/expedition";
 import { CHUNK_SIZE, STREAM_WINDOW_COLS, STREAM_WINDOW_ROWS } from "../constants";
 import { BIOMES } from "./biomes";
 import { Terrain } from "./terrain";
@@ -61,6 +62,7 @@ export const generateChunk = (
       x = originX + margin + rng() * (CHUNK_SIZE - margin * 2);
       z = originZ + margin + rng() * (CHUNK_SIZE - margin * 2);
       clear = !nearbyRamps.some((ramp) => inRampLane(ramp, x, z)) && Math.hypot(x, z) > (kind === "tree" || kind === "rock" ? 4 : 0);
+      clear &&= !expeditionClearing(x, z);
       if (kind === "tree" || kind === "rock") {
         clear &&= props.every((prop) => Math.hypot(prop.x - x, prop.z - z) >
           (kind === "tree" || prop.kind === "tree" ? 2.6 : 1.6));
@@ -132,7 +134,7 @@ export const generateChunk = (
       const clear = !nearbyRamps.some((ramp) => inRampLane(ramp, x, z)) && pedestals.every((p) => Math.hypot(p.position.x - x, p.position.z - z) > 5) &&
         props.every((p) => p.kind !== "tree" && p.kind !== "rock" || Math.hypot(p.x - x, p.z - z) > 2.8) &&
         Math.abs(terrain.heightAt(x + 1, z + 1) - height) < 0.25;
-      if (!clear && !startPile) continue;
+      if ((!clear || expeditionClearing(x, z)) && !startPile) continue;
       const width = startPile || crateRng() > 0.45 ? 2 : 1;
       for (let row = 0; row < 2; row += 1) {
         for (let col = 0; col < width; col += 1) {

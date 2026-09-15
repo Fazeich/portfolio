@@ -1,4 +1,5 @@
 import { chance, createRng } from "@/lib/random";
+import { expeditionClearing } from "@/lib/expedition";
 import { CHUNK_SIZE } from "../constants";
 import { PedestalDef } from "./types";
 
@@ -58,11 +59,14 @@ export const createPedestalForChunk = (
   const originX = cx * CHUNK_SIZE;
   const originZ = cz * CHUNK_SIZE;
   const game = MINI_GAMES[Math.floor(rng() * MINI_GAMES.length)];
+  const x = originX + rng() * CHUNK_SIZE;
+  const z = originZ + rng() * CHUNK_SIZE;
+  if (expeditionClearing(x, z)) return null;
 
   return makePedestal(
     `wild-${cx}-${cz}`,
-    originX + rng() * CHUNK_SIZE,
-    originZ + rng() * CHUNK_SIZE,
+    x,
+    z,
     game,
   );
 };

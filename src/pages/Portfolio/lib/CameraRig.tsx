@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { isAutoloopFrozen } from "@/lib/autoloop";
@@ -9,10 +10,6 @@ import {
   CAMERA_FOV_NEAR_ALTAR,
   CAMERA_HEIGHT,
   CAMERA_LOOK_BLEND,
-  INTERACTION_CAMERA_BACK,
-  INTERACTION_CAMERA_HEIGHT_OFFSET,
-  INTERACTION_CAMERA_LOOK_Y,
-  INTERACTION_CAMERA_SPEED,
   INTERACTION_RADIUS,
 } from "./constants";
 import { TownState } from "./state";
@@ -21,12 +18,12 @@ import { groundHeight, world } from "./world";
 const desired = new THREE.Vector3();
 const lookDesired = new THREE.Vector3();
 const project = new THREE.Vector3();
-const current = new THREE.Vector3();
-const currentLook = new THREE.Vector3();
 
 export const CameraRig = ({ state }: { state: TownState }) => {
+  const follow = useRef({ position: new THREE.Vector3(), look: new THREE.Vector3(), facing: state.player.facing, initialized: false });
   useFrame(({ camera, size }, delta) => {
-    if (isAutoloopFrozen()) {
+    if (isAutoloopFrozen() || state.paused) {
+      if (state.paused) state.tooltip.visible = false;
       return;
     }
 
@@ -52,53 +49,29 @@ export const CameraRig = ({ state }: { state: TownState }) => {
     const inRange = !state.interacting && nearest >= 0;
     const groundY = groundHeight(p.x, p.z);
 
-    if (state.interacting) {
-      const pedestal =
-        pedestals.find((item) => item.target === state.interactionTarget) ??
-        pedestals[0];
-
-      if (pedestal) {
-        const baseY = groundHeight(
-          pedestal.position.x,
-          pedestal.position.z,
-        );
-
-        desired.set(
-          pedestal.position.x,
-          baseY + pedestal.height + INTERACTION_CAMERA_HEIGHT_OFFSET,
-          pedestal.position.z + INTERACTION_CAMERA_BACK,
-        );
-        lookDesired.set(
-          pedestal.position.x,
-          baseY + pedestal.height + INTERACTION_CAMERA_LOOK_Y,
-          pedestal.position.z,
-        );
-      }
+    // Smooth the orbit angle rather than cutting through the player on a U-turn.
+    const tracking = follow.current;
+    const playerY = Math.max(groundY, p.y);
+    desired.set(p.x, playerY + CAMERA_HEIGHT + (inRange ? CAMERA_ALTAR_FOCUS_RAISE : 0), p.z);
+    lookDesired.set(p.x, playerY + 1, p.z);
+    if (!tracking.initialized) {
+      tracking.position.copy(desired);
+      tracking.look.copy(lookDesired);
+      tracking.facing = p.facing;
+      tracking.initialized = true;
     } else {
-      desired.set(p.x, groundY + CAMERA_HEIGHT, p.z + CAMERA_BACK);
-
-      if (inRange) {
-        desired.y += CAMERA_ALTAR_FOCUS_RAISE;
-      }
-
-      lookDesired.set(p.x, groundY + 1, p.z);
+      const blend = 1 - Math.exp(-CAMERA_BLEND * dt);
+      const angle = p.facing - tracking.facing;
+      tracking.facing += Math.atan2(Math.sin(angle), Math.cos(angle)) * blend;
+      tracking.position.lerp(desired, blend);
+      tracking.look.lerp(lookDesired, 1 - Math.exp(-CAMERA_LOOK_BLEND * dt));
     }
-
-    if (current.lengthSq() === 0) {
-      current.copy(desired);
-      currentLook.copy(lookDesired);
-    } else {
-      const speed = state.interacting ? INTERACTION_CAMERA_SPEED : 1;
-      const blend = 1 - Math.exp(-CAMERA_BLEND * speed * dt);
-      const lookBlend = 1 - Math.exp(-CAMERA_LOOK_BLEND * speed * dt);
-
-      current.lerp(desired, blend);
-      currentLook.lerp(lookDesired, lookBlend);
-    }
-
-    camera.position.copy(current);
-    camera.lookAt(currentLook);
-
+    camera.position.set(
+      tracking.position.x - Math.sin(tracking.facing) * CAMERA_BACK,
+      tracking.position.y,
+      tracking.position.z - Math.cos(tracking.facing) * CAMERA_BACK,
+    );
+    camera.lookAt(tracking.look);
     const targetFov = state.interacting
       ? CAMERA_FOV - 4
       : inRange

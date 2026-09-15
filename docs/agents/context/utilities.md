@@ -1,5 +1,22 @@
 # Utility Context
 
+
+- **Settings input isolation** (`src/pages/Portfolio/lib/controls.ts`): Editable elements and range inputs retain their keyboard controls instead of steering the car.
+
+
+- **Mission access regression** (`src/pages/Portfolio/lib/world/world.test.ts`): Validates solid-prop/crate clearance around all mission pickups across five seeds and neighboring chunks. `src/pages/Portfolio/lib/world/ramps.ts` excludes ramps near beacon areas; `src/pages/Portfolio/lib/world/pedestals.ts` excludes wild portals inside mission clearings.
+
+- **Shared camp and input reset** (`src/lib/expedition.ts`, `src/pages/Portfolio/lib/controls.ts`): CAMP coordinates keep map, world and completion proximity aligned; exported resetControls prevents held keys leaking through atlas pause.
+
+- **Expedition regression tests** (`src/lib/expedition.test.ts`): Full campaign in reverse order, resource sufficiency, duplicate prevention, completion gating and corrupted-save recovery.
+
+- **Town controls lifecycle** (`src/pages/Portfolio/lib/controls.ts`): Clears held keys on blur/bind/unmount, prevents arrow scrolling, and suppresses repeated portal keypresses.
+
+- **Expedition placement clearances** (`src/pages/Portfolio/lib/world/generate.ts`): Vegetation and supply piles reserve access around shared expedition landmarks and crystals.
+
+- **Expedition rules** (`src/lib/expedition.ts`): Five named beacons, twenty unique crystals, generation clearings, energy economy, pure progression reducer and defensive save parsing. Completion requires all beacons and returning to camp.
+- **Expedition store** (`src/stores/expedition/expedition.ts`): Effector discoveries, collection, restoration, completion and notices. Versioned per-seed localStorage persistence; isolated autoloop sessions and storage failure status.
+
 ## Core Utilities and Libs (`src/lib`)
 
 - **constants.ts** (`src/lib/constants.ts`): All gameplay tuning — arena size, snake speed/boost (max/drain/regen, `BOOST_MIN` start threshold, `BOOST_COOLDOWN`), turn rate, segment spacing, shell break threshold, shard physics params, HP, food spawn rules.
@@ -31,14 +48,14 @@
   - `noise.ts`: `valueNoise`, `fbm`, `smoothstep` — dependency-free height/biome noise.
   - `biomes.ts`: `BiomeId` + `BIOMES` (meadow / forest / rocky / mountain) with bright cartoon palettes and per-chunk spawn densities.
   - `terrain.ts`: `createTerrain(seed)` → `heightAt` (fbm hills + massif mountains, quantized to 0.25 for voxel steps, flat starting pad near spawn), `biomeAt`, `normalAt`.
-  - `generate.ts` (`src/pages/Portfolio/lib/world/generate.ts`): Seeded biome-weighted vegetation with spacing between solid props, chunk-edge margins and spawn/pedestal clearings. A separate RNG generates 3�5-crate supply piles on reasonably flat areas in 48% of chunks, plus the nine-crate starting stack. Crates are dynamic and excluded from static colliders.
+  - `generate.ts` (`src/pages/Portfolio/lib/world/generate.ts`): Seeded biome-weighted vegetation with spacing between solid props, chunk-edge margins and spawn/pedestal clearings. A separate RNG generates 3–5-crate supply piles on reasonably flat areas in 48% of chunks, plus the nine-crate starting stack. Crates are dynamic and excluded from static colliders.
   - `pedestals.ts` (`src/pages/Portfolio/lib/world/pedestals.ts`): Portal focus height is 3.9 to match the redesigned plaque. `createStartPedestals()` guarantees Snake 3D and Letter Rain in the initial area; `createPedestalForChunk(seed, cx, cz)` applies `PEDESTAL_CHANCE` (1%) independently to every streamed chunk; `createPedestals(seed)` is the initial-window helper.
   - `index.ts`: Streaming world manager. Keeps a deterministic `chunkCache`, maintains an active 8×6 window around the player's current chunk, rebuilds active props/pedestals/colliders on window shifts, and exposes `updateWorldStreaming`, `subscribeWorld`, `getWorldRevision`, `world`, `terrain`, and `groundHeight`.
   - `types.ts` (`src/pages/Portfolio/lib/world/types.ts`): `Prop` (including dynamic crate spawn definitions), `Chunk`, `Collider`, `PedestalDef`, `World`.
   - `index.ts`: builds the singleton `world` (seed, terrain, chunks, props, pedestals, colliders) and exports `groundHeight(x, z)` and `terrain`.
 - **Car physics** (`src/pages/Portfolio/lib/carPhysics.ts`): Mutable heightfield simulation with bounded 120 Hz substeps, slope forces, quicker acceleration and steering with a gravity/load traction cap, speed-tapered target yaw with fast release/countersteering, and lighter damped chassis lean. Flight retains angular inertia. Unilateral spring-damper support uses terrain-relative vertical velocity, finite suspension travel and a damped bottom-stop rebound. Climbs build vertical momentum; crests release into ballistic flight without ground attraction. Isotropic air drag and airborne yaw preserve world-space horizontal direction and chassis angular inertia, with damped pitch/roll springs acting only under ground support. `CarBody.y` is the suspension equilibrium reference and may compress by `SUSPENSION_TRAVEL`.
 - **Car physics tests** (`src/pages/Portfolio/lib/carPhysics.test.ts`): Driving, slopes, turning inertia, ramp takeoff and settling, ledge gravity, airborne controls/momentum, hard landing rebound and matching 30/60/120 fps trajectories.
-- **Town shared physics/interaction** (`src/pages/Portfolio/lib`): Used by both `CharacterModel` (mage) and `CarModel` (car).
+- **Town shared physics/interaction** (`src/pages/Portfolio/lib`): Used by `CarModel` for driving and portal interaction.
   - `physics.ts`: `resolveObstacles(pos, radius)` (circle-vs-cylinder push-out over the currently active `world.colliders`, returns whether a hit occurred so the car can damp its speed). Player movement has no artificial world-boundary clamp; streaming moves the active window as the player travels.
   - `interaction.ts`: `tryStartInteraction(state)` (find nearest pedestal within `INTERACTION_RADIUS` and arm the activation) and `stepInteraction(state, dt, onNavigate)` (advance `interactionTimer`, navigate when it reaches `ANIMATION_DURATION`, return whether an interaction is in progress so movement is skipped).
 
@@ -88,3 +105,5 @@ Related: `.opencode/agent/autoloop.md` (restricted implementer agent), `docs/age
 - **Ramps** (`src/pages/Portfolio/lib/world/ramps.ts`): Seeded rare curved ramps on gentle terrain, three heights (0.8/1.6/2.4), cardinal headings, pedestal clearance and open approach/landing lanes. Analytic surface helpers and testable `createDrivingSurface` match the render profile. `world/index.ts` exposes active ramps and `drivingTerrain`; `world/types.ts` stores ramp definitions per chunk and world. `world/generate.ts` reserves lanes across adjacent chunks.
 
 - **Handling/impact/ramp tests** (`src/pages/Portfolio/lib/carPhysics.test.ts`, `src/pages/Portfolio/lib/cratePhysics.test.ts`, `src/pages/Portfolio/lib/world/ramps.test.ts`): Countersteering/release response, approach-only crate impulse, airborne clearance, momentum transfer, support removal, settling, seeded ramp sizes and actual car takeoff/landing on all three profiles.
+
+- **World constants** (`src/pages/Portfolio/lib/constants.ts`): Removed unused on-foot movement and animation tuning; car physics tuning remains in carPhysics.ts.

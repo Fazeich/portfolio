@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { BEACONS, CRYSTALS } from "@/lib/expedition";
 import {
   CHUNK_SIZE,
   STREAM_WINDOW_COLS,
@@ -49,6 +50,22 @@ describe("terrain", () => {
 });
 
 describe("chunk generation", () => {
+  it("keeps expedition pickup areas clear across seeds and chunk borders", () => {
+    for (const seed of [1, 42, 1337, 2026, 98765]) {
+      const terrain = createTerrain(seed);
+      for (const beacon of BEACONS) {
+        const cx = Math.floor(beacon.x / CHUNK_SIZE), cz = Math.floor(beacon.z / CHUNK_SIZE);
+        for (let dx = -1; dx <= 1; dx += 1) for (let dz = -1; dz <= 1; dz += 1) {
+          const chunk = generateChunk(terrain, seed, cx + dx, cz + dz, createPedestals(seed));
+          for (const point of [beacon, ...CRYSTALS.filter((c) => c.id.startsWith(beacon.id))]) {
+            for (const prop of chunk.props.filter((p) => p.kind === "tree" || p.kind === "rock" || p.kind === "crate")) {
+              expect(Math.hypot(prop.x - point.x, prop.z - point.z)).toBeGreaterThan(2.5);
+            }
+          }
+        }
+      }
+    }
+  });
   it("builds one chunk per grid cell", () => {
     const terrain = createTerrain(SEED);
     const chunks = generateChunks(terrain, SEED, createPedestals(SEED));

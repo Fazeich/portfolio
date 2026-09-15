@@ -6,7 +6,7 @@ verified by a vision-model judge on fixed-seed screenshots.
 ## Style
 
 - Voxel / low-poly diorama, bright and readable, consistent with the procedural
-  character and car (`src/pages/Portfolio/lib/CharacterModel.tsx`, `CarModel.tsx`).
+  car (`src/pages/Portfolio/lib/CarModel.tsx`).
 - No external assets: no GLTF, no texture files. All geometry and materials are
   generated procedurally in code.
 

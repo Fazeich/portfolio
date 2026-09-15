@@ -4,18 +4,6 @@ export const STREAM_WINDOW_ROWS = 6;
 
 export const TERRAIN_SEED = 1337;
 
-export const PLAYER_SPEED = 6;
-export const PLAYER_HEIGHT = 1.7;
-export const PLAYER_RADIUS = 0.45;
-export const WALK_CYCLE_SPEED = 1.8;
-export const BLEND_SPEED = 12;
-export const TURN_SPEED = 18;
-export const BOB_AMPLITUDE = 0.03;
-export const PELVIS_SWAY = 0.08;
-export const SPINE_SWAY = 0.04;
-export const SPINE_FORWARD = 0.02;
-export const HEAD_SWAY = 0.02;
-export const SHOULDER_SHRUG = 0.04;
 
 export const INTERACTION_RADIUS = 3.6;
 export const ANIMATION_DURATION = 4;

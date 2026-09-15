@@ -54,7 +54,7 @@ export const Crates = ({
   }, [blocks, dummy]);
 
   useFrame((_, delta) => {
-    if (isAutoloopFrozen()) {
+    if (isAutoloopFrozen() || state.paused) {
       return;
     }
 

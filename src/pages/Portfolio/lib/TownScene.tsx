@@ -1,13 +1,11 @@
 import { SoftShadows } from "@react-three/drei";
-import { CharacterId, TownState } from "./state";
+import { TownState } from "./state";
 import {
   FOG_FAR,
   FOG_NEAR,
-  PLAYER_RADIUS,
   SKY_COLOR,
   SUN_POSITION,
 } from "./constants";
-import { CharacterModel } from "./CharacterModel";
 import { CarModel } from "./CarModel";
 import { CAR_RADIUS } from "./carPhysics";
 import { Crates } from "./Crates";
@@ -17,14 +15,13 @@ import { Props } from "./Props";
 import { Pedestals } from "./Pedestals";
 import { Ramps } from "./Ramps";
 import { WorldStreamer } from "./WorldStreamer";
+import { ExpeditionWorld } from "./ExpeditionWorld";
 
 export const TownScene = ({
   state,
-  character,
   onNavigate,
 }: {
   state: TownState;
-  character: CharacterId;
   onNavigate: (path: string) => void;
 }) => (
   <>
@@ -55,16 +52,13 @@ export const TownScene = ({
     <Props />
     <Ramps />
     <Pedestals state={state} />
+    <ExpeditionWorld state={state} />
     <Crates
       state={state}
-      radius={character === "car" ? CAR_RADIUS : PLAYER_RADIUS}
+      radius={CAR_RADIUS}
     />
 
-    {character === "mage" ? (
-      <CharacterModel state={state} onNavigate={onNavigate} />
-    ) : (
-      <CarModel state={state} onNavigate={onNavigate} />
-    )}
+    <CarModel state={state} onNavigate={onNavigate} />
 
     <CameraRig state={state} />
   </>

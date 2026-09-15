@@ -69,7 +69,7 @@ export const InteractionTooltip = ({
     >
       <div
         style={{
-          background: "rgba(0, 0, 0, 0.75)",
+          background: "rgb(16 32 39 / var(--hud-opacity, .55))",
           color: "#e2e8f0",
           padding: "6px 16px",
           borderRadius: 8,

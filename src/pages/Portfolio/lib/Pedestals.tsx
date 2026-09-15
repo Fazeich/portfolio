@@ -45,11 +45,14 @@ const Pedestal = ({
 }) => {
   const ringRef = useRef<THREE.Mesh>(null);
   const emblemRef = useRef<THREE.Group>(null);
+  const animationTime = useRef(0);
 
-  useFrame(({ clock }) => {
+  useFrame((_, delta) => {
+    if (state.paused || isAutoloopFrozen()) return;
+    animationTime.current += Math.min(delta, 0.05);
     if (isAutoloopFrozen()) return;
     const active = state.hoveredPedestalId === pedestal.id;
-    const t = clock.getElapsedTime();
+    const t = animationTime.current;
     const pulse = active ? 0.5 + 0.5 * Math.sin(t * 3) : 0;
 
     if (emblemRef.current) {
@@ -142,11 +145,14 @@ const Pedestal = ({
 
 export const Pedestals = ({ state }: { state: TownState }) => {
   const lightRef = useRef<THREE.PointLight>(null);
-  useFrame(({ clock }) => {
+  const animationTime = useRef(0);
+  useFrame((_, delta) => {
+    if (state.paused || isAutoloopFrozen()) return;
+    animationTime.current += Math.min(delta, 0.05);
     const light = lightRef.current;
     if (!light) return;
     const active = world.pedestals.find((pedestal) => pedestal.id === state.hoveredPedestalId);
-    light.intensity = active ? 1.8 + Math.sin(clock.elapsedTime * 3) * 0.4 : 0;
+    light.intensity = active ? 1.8 + Math.sin(animationTime.current * 3) * 0.4 : 0;
     if (active) {
       light.position.set(active.position.x, groundHeight(active.position.x, active.position.z) + 3.3, active.position.z);
       light.color.set(active.accent);

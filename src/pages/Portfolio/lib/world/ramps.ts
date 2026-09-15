@@ -1,4 +1,5 @@
 import { createRng } from "@/lib/random";
+import { BEACONS } from "@/lib/expedition";
 import { CHUNK_SIZE } from "../constants";
 import { Terrain } from "./terrain";
 import { createPedestalForChunk, createStartPedestals } from "./pedestals";
@@ -17,6 +18,7 @@ export const createRampForChunk = (terrain: Terrain, seed: number, cx: number, c
   if (rng() > 0.13 || (Math.abs(cx) < 2 && Math.abs(cz) < 2)) return null;
   const variant = Math.floor(rng() * RAMP_SIZES.length);
   const x = (cx + 0.5) * CHUNK_SIZE, z = (cz + 0.5) * CHUNK_SIZE;
+  if (BEACONS.some((beacon) => Math.hypot(beacon.x - x, beacon.z - z) < 20)) return null;
   const heading = Math.floor(rng() * 4) * Math.PI / 2;
   const size = RAMP_SIZES[variant];
   const y = terrain.heightAt(x - Math.sin(heading) * size.length / 2, z - Math.cos(heading) * size.length / 2);
